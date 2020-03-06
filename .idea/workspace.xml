@@ -1,0 +1,125 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project version="4">
+  <component name="ChangeListManager">
+    <list default="true" id="10af9ddb-8f33-4065-a892-ce91bc194b89" name="Default Changelist" comment="">
+      <change afterPath="$PROJECT_DIR$/.gitignore" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/.idea/.gitignore" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/.idea/compiler.xml" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/.idea/libraries/FormAPI.xml" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/.idea/misc.xml" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/.idea/uiDesigner.xml" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/DGuard.iml" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/pom.xml" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/main/java/ru/dragonestia/dguard/DGuard.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/main/java/ru/dragonestia/dguard/commands/RegionCommand.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/main/java/ru/dragonestia/dguard/custom/RegionCommandCondition.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/main/java/ru/dragonestia/dguard/custom/RegionCountChecker.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/main/java/ru/dragonestia/dguard/custom/RegionSizeChecker.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/main/java/ru/dragonestia/dguard/elements/Flag.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/main/java/ru/dragonestia/dguard/elements/Point.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/main/java/ru/dragonestia/dguard/elements/Region.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/main/java/ru/dragonestia/dguard/elements/RegionManager.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/main/java/ru/dragonestia/dguard/elements/Role.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/main/java/ru/dragonestia/dguard/exceptions/InvalidRegionIdException.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/main/java/ru/dragonestia/dguard/exceptions/RegionAlreadyExistException.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/main/java/ru/dragonestia/dguard/exceptions/RegionLimitCountException.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/main/java/ru/dragonestia/dguard/exceptions/RegionLimitSizeException.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/main/java/ru/dragonestia/dguard/exceptions/RegionNotFoundException.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/main/java/ru/dragonestia/dguard/listeners/BlockListener.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/main/java/ru/dragonestia/dguard/listeners/EntityListener.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/main/java/ru/dragonestia/dguard/listeners/PlayerListener.java" afterDir="false" />
+    </list>
+    <option name="SHOW_DIALOG" value="false" />
+    <option name="HIGHLIGHT_CONFLICTS" value="true" />
+    <option name="HIGHLIGHT_NON_ACTIVE_CHANGELIST" value="false" />
+    <option name="LAST_RESOLUTION" value="IGNORE" />
+  </component>
+  <component name="FileTemplateManagerImpl">
+    <option name="RECENT_TEMPLATES">
+      <list>
+        <option value="Enum" />
+        <option value="Class" />
+        <option value="Interface" />
+      </list>
+    </option>
+  </component>
+  <component name="Git.Settings">
+    <option name="RECENT_GIT_ROOT_PATH" value="$PROJECT_DIR$" />
+  </component>
+  <component name="IgnoredFileRootStore">
+    <option name="generatedRoots">
+      <set>
+        <option value="C:\Users\Андрей\Desktop\Библиотеки\DGuard\.idea" />
+      </set>
+    </option>
+  </component>
+  <component name="ProjectId" id="1YiPavLWow8oWp79RZsjOi7PBRZ" />
+  <component name="ProjectLevelVcsManager" settingsEditedManually="true">
+    <ConfirmationsSetting value="2" id="Add" />
+  </component>
+  <component name="ProjectViewState">
+    <option name="hideEmptyMiddlePackages" value="true" />
+    <option name="showExcludedFiles" value="true" />
+    <option name="showLibraryContents" value="true" />
+  </component>
+  <component name="PropertiesComponent">
+    <property name="Downloaded.Files.Path.Enabled" value="false" />
+    <property name="Repository.Attach.Annotations" value="false" />
+    <property name="Repository.Attach.JavaDocs" value="false" />
+    <property name="Repository.Attach.Sources" value="false" />
+    <property name="RunOnceActivity.ShowReadmeOnStart" value="true" />
+    <property name="last_opened_file_path" value="$PROJECT_DIR$/../../FormAPI.jar!/" />
+    <property name="project.structure.last.edited" value="Artifacts" />
+    <property name="project.structure.proportion" value="0.15" />
+    <property name="project.structure.side.proportion" value="0.2" />
+    <property name="settings.editor.selected.configurable" value="reference.projectsettings.compiler.javacompiler" />
+  </component>
+  <component name="ServiceViewManager">
+    <option name="viewStates">
+      <list>
+        <serviceView>
+          <treeState>
+            <expand />
+            <select />
+          </treeState>
+        </serviceView>
+      </list>
+    </option>
+  </component>
+  <component name="SvnConfiguration">
+    <configuration />
+  </component>
+  <component name="TaskManager">
+    <task active="true" id="Default" summary="Default task">
+      <changelist id="10af9ddb-8f33-4065-a892-ce91bc194b89" name="Default Changelist" comment="" />
+      <created>1583422508140</created>
+      <option name="number" value="Default" />
+      <option name="presentableId" value="Default" />
+      <updated>1583422508140</updated>
+    </task>
+    <servers />
+  </component>
+  <component name="WindowStateProjectService">
+    <state x="488" y="74" key="#com.intellij.ide.util.MemberChooser" timestamp="1583428560242">
+      <screen x="0" y="0" width="1366" height="728" />
+    </state>
+    <state x="488" y="74" key="#com.intellij.ide.util.MemberChooser/0.0.1366.728@0.0.1366.728" timestamp="1583428560242" />
+    <state x="413" y="111" key="#com.intellij.refactoring.safeDelete.UnsafeUsagesDialog" timestamp="1583456517192">
+      <screen x="0" y="0" width="1366" height="728" />
+    </state>
+    <state x="413" y="111" key="#com.intellij.refactoring.safeDelete.UnsafeUsagesDialog/0.0.1366.728@0.0.1366.728" timestamp="1583456517192" />
+    <state x="389" y="106" key="FileChooserDialogImpl" timestamp="1583424329505">
+      <screen x="0" y="0" width="1366" height="728" />
+    </state>
+    <state x="389" y="106" key="FileChooserDialogImpl/0.0.1366.728@0.0.1366.728" timestamp="1583424329505" />
+    <state x="163" y="0" key="SettingsEditor" timestamp="1583467683088">
+      <screen x="0" y="0" width="1366" height="728" />
+    </state>
+    <state x="163" y="0" key="SettingsEditor/0.0.1366.728@0.0.1366.728" timestamp="1583467683088" />
+    <state x="387" y="258" key="com.intellij.jarRepository.RepositoryAttachDialog-DOWNLOAD" timestamp="1583422635085">
+      <screen x="0" y="0" width="1366" height="728" />
+    </state>
+    <state x="387" y="258" key="com.intellij.jarRepository.RepositoryAttachDialog-DOWNLOAD/0.0.1366.728@0.0.1366.728" timestamp="1583422635085" />
+  </component>
+</project>
