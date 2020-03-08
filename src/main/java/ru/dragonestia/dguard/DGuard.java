@@ -6,8 +6,8 @@ import ru.dragonestia.dguard.commands.RegionCommand;
 import ru.dragonestia.dguard.custom.RegionCommandCondition;
 import ru.dragonestia.dguard.custom.RegionCountChecker;
 import ru.dragonestia.dguard.custom.RegionSizeChecker;
+import ru.dragonestia.dguard.elements.Flag;
 import ru.dragonestia.dguard.listeners.BlockListener;
-import ru.dragonestia.dguard.listeners.EntityListener;
 import ru.dragonestia.dguard.listeners.PlayerListener;
 
 public class DGuard extends PluginBase {
@@ -38,10 +38,13 @@ public class DGuard extends PluginBase {
 
         //Регистрация эвентов
         getServer().getPluginManager().registerEvents(new BlockListener(), this);
-        getServer().getPluginManager().registerEvents(new EntityListener(), this);
         getServer().getPluginManager().registerEvents(new PlayerListener(), this);
 
         //Регистрация флагов
+        Flag.register("doors","Свободное открытие дверей", "Возможность другим открывать свободно двери, люки и калитки", false);
+        Flag.register("chests", "Свободное открытие сундуков", "Возможность другим игрокоам взаимодействовать с сундуками", false);
+        Flag.register("furnace", "Свободжное открытие печек", "Возможность другим игрокам свободно взаимодействовать с печками", false);
+        Flag.register("pvp", "Режим PvP", "Возможность драться с другими игроками", false);
     }
 
 }
