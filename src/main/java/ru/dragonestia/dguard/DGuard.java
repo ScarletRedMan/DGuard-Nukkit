@@ -1,8 +1,10 @@
 package ru.dragonestia.dguard;
 
+import cn.nukkit.Player;
 import cn.nukkit.plugin.PluginBase;
 import cn.nukkit.utils.Config;
 import ru.dragonestia.dguard.commands.RegionCommand;
+import ru.dragonestia.dguard.custom.CanDoAllCondition;
 import ru.dragonestia.dguard.custom.RegionCommandCondition;
 import ru.dragonestia.dguard.custom.RegionCountChecker;
 import ru.dragonestia.dguard.custom.RegionSizeChecker;
@@ -19,6 +21,8 @@ public class DGuard extends PluginBase {
     public static RegionCountChecker regionCountChecker = (player, count) -> config.getInt("max-count") > count;
 
     public static RegionSizeChecker regionSizeChecker = (player, size) -> config.getLong("max-size") > size;
+
+    public static CanDoAllCondition canDoAllCondition = Player::isOp;
 
     @Override
     public void onLoad() {
