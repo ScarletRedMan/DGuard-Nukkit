@@ -30,9 +30,10 @@ public class DGuard extends PluginBase {
         areas = new Config("plugins/DGuard/areas.yml", Config.YAML);
 
         //Основной конфиг
-        if(config.exists("max-count")) config.set("max-count", 2);
-        if(config.exists("max-size")) config.set("max-size", 10000);
-        if(config.exists("can-build-out-region")) config.set("can-build-out-region", true);
+        if(!config.exists("max-count")) config.set("max-count", 2);
+        if(!config.exists("max-size")) config.set("max-size", 10000);
+        if(!config.exists("can-build-out-region")) config.set("can-build-out-region", true);
+        config.save();
     }
 
     @Override

@@ -1,0 +1,6 @@
+name: DGuard
+author: qPexLegendary
+version: 2.0.0
+api: 1.0.8
+main: ru.dragonestia.dguard.DGuard
+load: STARTUP

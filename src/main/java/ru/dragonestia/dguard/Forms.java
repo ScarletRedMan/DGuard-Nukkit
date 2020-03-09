@@ -90,12 +90,12 @@ public class Forms {
 
         if (region.getMembers().size() == 0) members = "§eОтсутствуют§f";
         else {
-            members = "§3" + String.join(" ", (String[]) region.getMembers().toArray()) + "§f";
+            members = "§3" + String.join(" ", region.getMembers()) + "§f";
         }
 
         if (region.getGuests().size() == 0) guests = "§eОтсутствуют§f";
         else {
-            guests = "§3" + String.join(" ", (String[]) region.getGuests().toArray()) + "§f";
+            guests = "§3" + String.join(" ", region.getGuests()) + "§f";
         }
 
         form.setContent(
@@ -195,7 +195,7 @@ public class Forms {
                     }
 
                     try {
-                        Region.register(targetPlayer, input, targetPlayer.level.getName(), new Point(0, 0), new Point(0, 0));
+                        Region.register(targetPlayer, input, targetPlayer.level.getName(), Point.firstPoints.get(player), Point.secondPoints.get(player));
                         player.sendMessage("§e§lРегион §6" + input + "§e был успешно создан!");
                     } catch (PointsInDifferentLevelsException ex) {
                         player.sendMessage("§c§lТочки территории находятся в разных мирах.");
@@ -310,7 +310,7 @@ public class Forms {
 
             data.remove(0);
 
-            List<String> flags = new ArrayList<>(Flag.flags.keySet());
+            List<Flag> flags = new ArrayList<>(Flag.flags.values());
 
             for (int i = 0; i < data.size(); i++) {
                 region.setFlag(flags.get(i), (boolean) data.get(i));

@@ -201,7 +201,7 @@ public class BlockListener implements Listener {
         List<Integer> items = Arrays.asList(259, 325, 269, 273, 256, 284, 277, 290, 291, 292, 294, 293);
         List<Integer> doors = Arrays.asList(64, 193, 195, 196, 197, 194, 71, 96, 167, 107, 183, 184, 185, 187, 186);
         List<Integer> furnaces = Arrays.asList(61, 62);
-        List<Integer> chests = Arrays.asList(54, 146);
+        List<Integer> chests = Arrays.asList(54, 146, 218);
 
         if(items.contains(player.getInventory().getItemInHand().getId()) && region.getRole(player.getName()).getId() < Role.Member.getId() && !DGuard.canDoAllCondition.check(player)){
             event.setCancelled();

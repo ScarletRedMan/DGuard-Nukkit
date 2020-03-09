@@ -39,7 +39,7 @@ public class Region {
     }
 
     public long getSize(){
-        return (getMaxPos().x - getMinPos().x) * (getMinPos().z - getMaxPos().z);
+        return (getMaxPos().x - getMinPos().x) * (getMaxPos().z - getMinPos().z);
     }
 
     public String getOwner(){
@@ -144,6 +144,8 @@ public class Region {
         Point min, max;
         min = Point.getMin(point1, point2);
         max = Point.getMax(point1, point2);
+
+        min.level = max.level = point1.level;
 
         if(!DGuard.regionSizeChecker.check(player, (max.x - min.x) * (max.z - min.z))) throw new RegionLimitSizeException();
 
