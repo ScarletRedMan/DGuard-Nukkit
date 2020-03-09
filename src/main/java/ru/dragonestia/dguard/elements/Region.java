@@ -134,16 +134,20 @@ public class Region {
         DGuard.areas.save(true);
     }
 
-    public static void register(Player player, String id, String level, Point point1, Point point2) throws RegionLimitCountException, RegionLimitSizeException, InvalidRegionIdException, RegionAlreadyExistException {
+    public static void register(Player player, String id, String level, Point point1, Point point2) throws RegionLimitCountException, RegionLimitSizeException, InvalidRegionIdException, RegionAlreadyExistException, RegionIsCharacterizedByOtherRegionsException, PointsInDifferentLevelsException {
         RegionManager regionManager = new RegionManager(player);
 
         if(!DGuard.regionCountChecker.check(player, regionManager.getCount())) throw new RegionLimitCountException();
+
+        if(!point1.level.equals(point2.level)) throw new PointsInDifferentLevelsException();
 
         Point min, max;
         min = Point.getMin(point1, point2);
         max = Point.getMax(point1, point2);
 
         if(!DGuard.regionSizeChecker.check(player, (max.x - min.x) * (max.z - min.z))) throw new RegionLimitSizeException();
+
+        if(Point.isPrivateArea(min, max)) throw new RegionIsCharacterizedByOtherRegionsException();
 
         id = id.trim().toLowerCase();
 

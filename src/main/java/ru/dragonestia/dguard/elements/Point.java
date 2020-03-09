@@ -1,10 +1,17 @@
 package ru.dragonestia.dguard.elements;
 
+import cn.nukkit.Player;
 import cn.nukkit.level.Level;
+import cn.nukkit.level.Position;
 import ru.dragonestia.dguard.DGuard;
 import ru.dragonestia.dguard.exceptions.RegionNotFoundException;
 
+import java.util.HashMap;
+
 public class Point {
+
+    public static HashMap<Player, Point> firstPoints = new HashMap<>();
+    public static HashMap<Player, Point> secondPoints = new HashMap<>();
 
     public int x, z;
     public Level level;
@@ -68,6 +75,14 @@ public class Point {
             if(!(DGuard.areas.getInt(id + ".xMin") > max.x || DGuard.areas.getInt(id + ".xMax") < min.x || DGuard.areas.getInt(id + ".zMin") > max.z || DGuard.areas.getInt(id + ".zMax") < min.z)) return true;
         }
         return false;
+    }
+
+    public static void makeFirstPos(Player player, Position pos){
+        firstPoints.put(player, new Point((int) pos.x, (int) pos.z, pos.level));
+    }
+
+    public static void makeSecondPos(Player player, Position pos){
+        secondPoints.put(player, new Point((int) pos.x, (int) pos.z, pos.level));
     }
 
 }
