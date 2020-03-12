@@ -38,8 +38,16 @@ public class Region {
         return new Point(DGuard.areas.getInt(id + ".xMax"), DGuard.areas.getInt(id + ".zMax"));
     }
 
+    public long getLength(){
+        return getMaxPos().x - getMinPos().x;
+    }
+
+    public long getWeight(){
+        return getMaxPos().z - getMinPos().z;
+    }
+
     public long getSize(){
-        return (getMaxPos().x - getMinPos().x) * (getMaxPos().z - getMinPos().z);
+        return getLength() * getWeight();
     }
 
     public String getOwner(){

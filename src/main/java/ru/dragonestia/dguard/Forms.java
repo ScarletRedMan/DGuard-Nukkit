@@ -98,14 +98,19 @@ public class Forms {
             guests = "§3" + String.join(" ", region.getGuests()) + "§f";
         }
 
+        String flags = "";
+        for(Flag flag: Flag.flags.values()){
+            flags += " §2" + flag.getName() + "§f - " + (flag.getValue(region)? "§aДа" : "§cНет") +"§f\n";
+        }
+
         form.setContent(
-                "Информация о регионе §d" + region.getId() + "§f:\n" +
-                        "\n" +
-                        "§fВладелец региона: §e" + region.getOwner() + "§f\n" +
-                        "§fЖители региона: " + members + "§f.\n" +
-                        "§fГости: " + guests + "§f.\n" +
-                        "§fПлощадь региона: §b" + region.getSize() + "§f\n"
-        ).addButton("Выход");
+                "§lИнформация о регионе §d" + region.getId() + "§f:§r\n" +
+                        " §fВладелец региона: §e" + region.getOwner() + "§f\n" +
+                        " §fЖители региона: " + members + "§f.\n" +
+                        " §fГости: " + guests + "§f.\n" +
+                        " §fПлощадь региона: §b" + region.getSize() + "§f(§e" + region.getLength() +"§6x§e" + region.getWeight() + ")\n" +
+                        "\n§l§fФлаги:§r\n" + flags
+        );
 
         form.send(player);
 
