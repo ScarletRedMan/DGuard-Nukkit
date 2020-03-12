@@ -8,6 +8,7 @@ import cn.nukkit.level.Position;
 import ru.dragonestia.dguard.DGuard;
 import ru.dragonestia.dguard.Forms;
 import ru.dragonestia.dguard.elements.Point;
+import ru.dragonestia.dguard.elements.Region;
 
 public class RegionCommand extends Command {
 
@@ -45,6 +46,13 @@ public class RegionCommand extends Command {
             case "pos2":
                 Point.makeSecondPos(player, new Position(player.x, 0, player.z, player.level));
                 sender.sendMessage("§6§lВторая точка§e была установлена успешно!");
+                break;
+
+            case "test":
+                Region region = new Point((int) player.x, (int) player.z, player.level).getRegion();
+                if(region == null) return false;
+
+                player.sendMessage(DGuard.areas.get(region.getId()).toString());
                 break;
         }
         return true;

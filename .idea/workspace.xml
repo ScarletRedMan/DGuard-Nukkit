@@ -7,13 +7,11 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="10af9ddb-8f33-4065-a892-ce91bc194b89" name="Default Changelist" comment="">
-      <change afterPath="$PROJECT_DIR$/out/artifacts/DGuard/DGuard.jar" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/main/resources/plugin.yml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/ru/dragonestia/dguard/DGuard.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/ru/dragonestia/dguard/DGuard.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/ru/dragonestia/dguard/Forms.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/ru/dragonestia/dguard/Forms.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/ru/dragonestia/dguard/elements/Region.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/ru/dragonestia/dguard/elements/Region.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/out/artifacts/DGuard/DGuard.jar" beforeDir="false" afterPath="$PROJECT_DIR$/out/artifacts/DGuard/DGuard.jar" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/ru/dragonestia/dguard/commands/RegionCommand.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/ru/dragonestia/dguard/commands/RegionCommand.java" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/main/java/ru/dragonestia/dguard/listeners/BlockListener.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/ru/dragonestia/dguard/listeners/BlockListener.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/ru/dragonestia/dguard/listeners/PlayerListener.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/ru/dragonestia/dguard/listeners/PlayerListener.java" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -117,7 +115,14 @@
       <option name="project" value="LOCAL" />
       <updated>1583733316458</updated>
     </task>
-    <option name="localTasksCounter" value="5" />
+    <task id="LOCAL-00005" summary="Исправлены ошибки">
+      <created>1583740100559</created>
+      <option name="number" value="00005" />
+      <option name="presentableId" value="LOCAL-00005" />
+      <option name="project" value="LOCAL" />
+      <updated>1583740100559</updated>
+    </task>
+    <option name="localTasksCounter" value="6" />
     <servers />
   </component>
   <component name="VcsManagerConfiguration">
@@ -125,7 +130,8 @@
     <MESSAGE value="Добавлены базовые флаги" />
     <MESSAGE value="Добавлены формы + выделение точек" />
     <MESSAGE value="Админам добавлен доступ к чужим регионам(не управление)" />
-    <option name="LAST_COMMIT_MESSAGE" value="Админам добавлен доступ к чужим регионам(не управление)" />
+    <MESSAGE value="Исправлены ошибки" />
+    <option name="LAST_COMMIT_MESSAGE" value="Исправлены ошибки" />
     <option name="OPTIMIZE_IMPORTS_BEFORE_PROJECT_COMMIT" value="true" />
   </component>
   <component name="WindowStateProjectService">
@@ -137,10 +143,10 @@
       <screen x="0" y="0" width="1366" height="728" />
     </state>
     <state x="413" y="111" key="#com.intellij.refactoring.safeDelete.UnsafeUsagesDialog/0.0.1366.728@0.0.1366.728" timestamp="1583497805870" />
-    <state x="337" y="0" key="CommitChangelistDialog2" timestamp="1583733315598">
+    <state x="337" y="0" key="CommitChangelistDialog2" timestamp="1583740099382">
       <screen x="0" y="0" width="1366" height="728" />
     </state>
-    <state x="337" y="0" key="CommitChangelistDialog2/0.0.1366.728@0.0.1366.728" timestamp="1583733315598" />
+    <state x="337" y="0" key="CommitChangelistDialog2/0.0.1366.728@0.0.1366.728" timestamp="1583740099382" />
     <state x="389" y="106" key="FileChooserDialogImpl" timestamp="1583424329505">
       <screen x="0" y="0" width="1366" height="728" />
     </state>
@@ -153,10 +159,10 @@
       <screen x="0" y="0" width="1366" height="728" />
     </state>
     <state x="163" y="0" key="SettingsEditor/0.0.1366.728@0.0.1366.728" timestamp="1583733463482" />
-    <state x="275" y="86" key="Vcs.Push.Dialog.v2" timestamp="1583733318002">
+    <state x="275" y="86" key="Vcs.Push.Dialog.v2" timestamp="1583740105400">
       <screen x="0" y="0" width="1366" height="728" />
     </state>
-    <state x="275" y="86" key="Vcs.Push.Dialog.v2/0.0.1366.728@0.0.1366.728" timestamp="1583733318002" />
+    <state x="275" y="86" key="Vcs.Push.Dialog.v2/0.0.1366.728@0.0.1366.728" timestamp="1583740105400" />
     <state x="387" y="258" key="com.intellij.jarRepository.RepositoryAttachDialog-DOWNLOAD" timestamp="1583422635085">
       <screen x="0" y="0" width="1366" height="728" />
     </state>

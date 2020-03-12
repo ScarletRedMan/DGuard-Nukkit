@@ -221,7 +221,7 @@ public class BlockListener implements Listener {
             return;
         }
 
-        if(chests.contains(event.getBlock().getId()) && region.getRole(player.getName()).equals(Role.Nobody) && !region.getFlag(Flag.flags.get("cheats")) && !DGuard.canDoAllCondition.check(player)){
+        if(chests.contains(event.getBlock().getId()) && region.getRole(player.getName()).equals(Role.Nobody) && !region.getFlag(Flag.flags.get("chests")) && !DGuard.canDoAllCondition.check(player)){
             event.setCancelled();
             player.sendTip("§cУ вас не доступа к данному региону");
             return;
