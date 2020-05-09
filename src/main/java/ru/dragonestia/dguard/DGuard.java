@@ -16,13 +16,13 @@ public class DGuard extends PluginBase {
 
     public static Config config, areas;
 
+    public static CanDoAllCondition canDoAllCondition = Player::isOp;
+
     public static RegionCommandCondition regionCommandCondition = (player) -> true;
 
-    public static RegionCountChecker regionCountChecker = (player, count) -> config.getInt("max-count") > count;
+    public static RegionCountChecker regionCountChecker = (player, count) -> config.getInt("max-count") > count || canDoAllCondition.check(player);
 
-    public static RegionSizeChecker regionSizeChecker = (player, size) -> config.getLong("max-size") > size;
-
-    public static CanDoAllCondition canDoAllCondition = Player::isOp;
+    public static RegionSizeChecker regionSizeChecker = (player, size) -> config.getLong("max-size") > size || canDoAllCondition.check(player);
 
     @Override
     public void onLoad() {
