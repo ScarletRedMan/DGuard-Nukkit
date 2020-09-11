@@ -14,8 +14,8 @@ public class Flag {
         Server.getInstance().getLogger().info("Флаг '" + id.trim().toLowerCase() + "' был успешно зарегистрирован!");
     }
 
-    private String id, name, description;
-    private boolean defaultValue;
+    private final String id, name, description;
+    private final boolean defaultValue;
 
     private Flag(String id, String name, String description, boolean defaultValue){
         this.id = id;

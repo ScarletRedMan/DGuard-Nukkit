@@ -46,10 +46,11 @@ public class DGuard extends PluginBase {
         getServer().getPluginManager().registerEvents(new PlayerListener(), this);
 
         //Регистрация флагов
-        Flag.register("doors","Свободное открытие дверей", "Возможность другим открывать свободно двери, люки и калитки", false);
+        Flag.register("doors","Свободное открытие дверей, люков и калиток", "Возможность другим открывать свободно двери, люки и калитки", false);
         Flag.register("chests", "Свободное открытие сундуков", "Возможность другим игрокоам взаимодействовать с сундуками", false);
         Flag.register("furnace", "Свободное открытие печек", "Возможность другим игрокам свободно взаимодействовать с печками", false);
         Flag.register("pvp", "Режим PvP", "Возможность драться с другими игроками", false);
+        Flag.register("redstone", "Использование кнопок", "Возможность нажимать кнопки", false);
     }
 
 }
