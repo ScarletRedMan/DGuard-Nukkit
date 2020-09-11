@@ -1,4 +1,4 @@
 package ru.dragonestia.dguard.exceptions;
 
-public class RegionNotFoundException extends Exception {
+public class RegionNotFoundException extends Error {
 }
