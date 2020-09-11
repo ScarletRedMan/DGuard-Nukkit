@@ -18,10 +18,18 @@ import ru.dragonestia.dguard.elements.Point;
 import ru.dragonestia.dguard.elements.Region;
 import ru.dragonestia.dguard.elements.Role;
 
-import java.util.Arrays;
-import java.util.List;
-
 public class BlockListener implements Listener {
+
+    private final int[] blockedItems, doors, chests, furnaces, redstone, other;
+
+    public BlockListener(){
+        blockedItems = new int[]{259, 325, 269, 273, 256, 284, 277, 290, 291, 292, 294, 293};
+        doors = new int[]{64, 193, 194, 195, 196, 197, 404, 401, 403, 402, 400, 96, 107, 183, 184, 185, 187, 186};
+        chests = new int[]{458, 205, 54, 146};
+        furnaces = new int[]{453, 451, 61};
+        redstone = new int[]{77, 143, 399, 396, 398, 395, 397, 69};
+        other = new int[]{138, 449, 117, 125, 23, 468, 154, 84, 83, 149};
+    }
 
     @EventHandler(priority = EventPriority.HIGH)
     public void onPlace(BlockPlaceEvent event){
@@ -198,33 +206,54 @@ public class BlockListener implements Listener {
             return;
         }
 
-        List<Integer> items = Arrays.asList(259, 325, 269, 273, 256, 284, 277, 290, 291, 292, 294, 293);
-        List<Integer> doors = Arrays.asList(64, 193, 195, 196, 197, 194, 71, 96, 167, 107, 183, 184, 185, 187, 186);
-        List<Integer> furnaces = Arrays.asList(61, 62);
-        List<Integer> chests = Arrays.asList(54, 146, 218);
-
-        if(items.contains(player.getInventory().getItemInHand().getId()) && region.getRole(player.getName()).getId() < Role.Member.getId() && !DGuard.canDoAllCondition.check(player)){
-            event.setCancelled();
-            player.sendTip("§cУ вас не доступа к данному региону");
-            return;
+        for(int id: blockedItems){
+            if(id == player.getInventory().getItemInHand().getId()){
+                if(region.getRole(player.getName()).getId() < Role.Member.getId() && !DGuard.canDoAllCondition.check(player)){
+                    player.sendTip("§cУ вас не доступа к данному региону");
+                    event.setCancelled(true);
+                    return;
+                }else break;
+            }
         }
 
-        if(doors.contains(event.getBlock().getId()) && region.getRole(player.getName()).equals(Role.Nobody) && !region.getFlag(Flag.flags.get("doors")) && !DGuard.canDoAllCondition.check(player)){
-            event.setCancelled();
-            player.sendTip("§cУ вас не доступа к данному региону");
-            return;
+        for(int id: doors){
+            if(id == event.getBlock().getId()){
+                if(region.getRole(player.getName()).equals(Role.Nobody) && !region.getFlag(Flag.flags.get("doors")) && !DGuard.canDoAllCondition.check(player)){
+                    player.sendTip("§cУ вас не доступа к данному региону");
+                    event.setCancelled(true);
+                    return;
+                }else break;
+            }
         }
 
-        if(furnaces.contains(event.getBlock().getId()) && region.getRole(player.getName()).equals(Role.Nobody) && !region.getFlag(Flag.flags.get("furnace")) && !DGuard.canDoAllCondition.check(player)){
-            event.setCancelled();
-            player.sendTip("§cУ вас не доступа к данному региону");
-            return;
+        for(int id: chests){
+            if(id == event.getBlock().getId()){
+                if(region.getRole(player.getName()).equals(Role.Nobody) && !region.getFlag(Flag.flags.get("chests")) && !DGuard.canDoAllCondition.check(player)){
+                    player.sendTip("§cУ вас не доступа к данному региону");
+                    event.setCancelled(true);
+                    return;
+                }else break;
+            }
         }
 
-        if(chests.contains(event.getBlock().getId()) && region.getRole(player.getName()).equals(Role.Nobody) && !region.getFlag(Flag.flags.get("chests")) && !DGuard.canDoAllCondition.check(player)){
-            event.setCancelled();
-            player.sendTip("§cУ вас не доступа к данному региону");
-            return;
+        for(int id: furnaces){
+            if(id == event.getBlock().getId()){
+                if(region.getRole(player.getName()).equals(Role.Nobody) && !region.getFlag(Flag.flags.get("furnace")) && !DGuard.canDoAllCondition.check(player)){
+                    player.sendTip("§cУ вас не доступа к данному региону");
+                    event.setCancelled(true);
+                    return;
+                }else break;
+            }
+        }
+
+        for(int id: redstone){
+            if(id == event.getBlock().getId()){
+                if(region.getRole(player.getName()).equals(Role.Nobody) && !region.getFlag(Flag.flags.get("furnace")) && !DGuard.canDoAllCondition.check(player)){
+                    player.sendTip("§cУ вас не доступа к данному региону");
+                    event.setCancelled(true);
+                    return;
+                }else break;
+            }
         }
     }
 
