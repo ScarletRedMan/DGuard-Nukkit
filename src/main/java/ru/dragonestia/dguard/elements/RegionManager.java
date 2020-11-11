@@ -76,7 +76,7 @@ public class RegionManager {
         region.levelName = level.toLowerCase();
 
         DGuard.regions.put(id, region);
-        region.save(main.getRegionsTag());
+        region.save();
     }
 
 }

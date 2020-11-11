@@ -4,7 +4,6 @@ import cn.nukkit.nbt.tag.CompoundTag;
 import cn.nukkit.nbt.tag.ListTag;
 import cn.nukkit.nbt.tag.StringTag;
 import ru.dragonestia.dguard.DGuard;
-import ru.dragonestia.dguard.RegionsTag;
 import ru.dragonestia.dguard.task.RegionRemoveTask;
 import ru.dragonestia.dguard.task.RegionSaveTask;
 
@@ -150,7 +149,7 @@ public class Region {
         flags.putBoolean(flag.getId(), value);
     }
 
-    public void save(RegionsTag regionsTag){
+    public void save(){
         CompoundTag compoundTag = new CompoundTag(id);
 
         compoundTag.putInt("xMin", xMin);
