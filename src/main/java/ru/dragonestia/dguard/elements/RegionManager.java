@@ -11,25 +11,29 @@ import java.util.regex.Pattern;
 
 public class RegionManager {
 
-    private final Player player;
+    private final String playerName;
 
     private final DGuard main;
 
     public RegionManager(Player player, DGuard main){
-        this.player = player;
+        this.playerName = player.getName().toLowerCase();
+        this.main = main;
+    }
+
+    public RegionManager(String playerName, DGuard main){
+        this.playerName = playerName.toLowerCase();
         this.main = main;
     }
 
     public Player getPlayer() {
-        return player;
+        return main.getServer().getPlayer(playerName);
     }
 
     public List<Region> getRegions(){
         List<Region> list = new ArrayList<>();
-        String name = player.getName().toLowerCase();
 
         for(Region region: DGuard.regions.values()){
-            if(name.equals(region.getOwner())){
+            if(playerName.equals(region.getOwner())){
                 list.add(region);
             }
         }
@@ -39,15 +43,14 @@ public class RegionManager {
 
     public int getCount(){
         int count = 0;
-        String name = player.getName().toLowerCase();
-
         for(Region region: DGuard.regions.values()){
-            if(name.equals(region.getOwner())) ++count;
+            if(playerName.equals(region.getOwner())) ++count;
         }
         return count;
     }
 
     public void createRegion(String id, String level, Point point1, Point point2) throws RegionLimitCountException, RegionLimitSizeException, InvalidRegionIdException, RegionAlreadyExistException, RegionIsCharacterizedByOtherRegionsException, PointsInDifferentLevelsException {
+        Player player = getPlayer();
         CustomMethods customMethods = main.getCustomMethods();
 
         if(!customMethods.regionCountChecker.check(player, getCount())) throw new RegionLimitCountException();
