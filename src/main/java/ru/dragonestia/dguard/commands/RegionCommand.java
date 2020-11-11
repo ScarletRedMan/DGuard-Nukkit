@@ -7,6 +7,7 @@ import cn.nukkit.command.data.CommandParameter;
 import cn.nukkit.level.Position;
 import ru.dragonestia.dguard.DGuard;
 import ru.dragonestia.dguard.elements.Point;
+import ru.dragonestia.dguard.elements.Region;
 
 public class RegionCommand extends Command {
 
@@ -36,6 +37,8 @@ public class RegionCommand extends Command {
             return true;
         }
 
+        Region region;
+
         switch (args[0].toLowerCase()){
             case "pos1":
                 Point.makeFirstPos(player, new Position(player.x, 0, player.z, player.level));
@@ -45,6 +48,32 @@ public class RegionCommand extends Command {
             case "pos2":
                 Point.makeSecondPos(player, new Position(player.x, 0, player.z, player.level));
                 sender.sendMessage("§6§lВторая точка§e была установлена успешно!");
+                break;
+
+            case "info":
+                region = new Point(player.getFloorX(), player.getFloorZ(), player.getLevel()).getRegion();
+
+                if(region == null){
+                    player.sendMessage("§eВ данной местности нет регионов.");
+                    return true;
+                }
+
+                main.getForms().f_region_info(player, region);
+                break;
+
+            case "edit":
+                region = new Point(player.getFloorX(), player.getFloorZ(), player.getLevel()).getRegion();
+
+                if(region == null){
+                    player.sendMessage("§eВ данной местности нет регионов.");
+                    return true;
+                }
+
+                if(region.getOwner().equals(player.getName().toLowerCase())){
+                    main.getForms().f_edit_menu(player, region);
+                    return true;
+                }
+                player.sendMessage("§cВы не являетесь владельцем данного региона.");
                 break;
 
             default:
