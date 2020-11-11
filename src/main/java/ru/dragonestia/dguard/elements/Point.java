@@ -28,7 +28,7 @@ public class Point {
 
     public Region getRegion(){
         for(Region region: DGuard.regions.values()){
-            if(!region.getLevel().equals(level.getName()) || region.xMax < x || region.zMax < z || z < region.zMin || x < region.zMin) continue;
+            if(!region.getLevel().equals(level.getName()) || region.xMax < x || region.zMax < z || z < region.zMin || x < region.xMin) continue;
             return region;
         }
         return null;
