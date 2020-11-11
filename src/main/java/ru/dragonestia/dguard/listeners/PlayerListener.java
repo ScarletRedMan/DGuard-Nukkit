@@ -68,7 +68,7 @@ public class PlayerListener implements Listener {
         if(region == null){
             player.sendTip("§6Здесь нет регионов");
         }else{
-            player.sendMessage("§aЗдесь нет регионов");
+            player.sendTip("§aЗдесь есть регион");
         }
     }
 
