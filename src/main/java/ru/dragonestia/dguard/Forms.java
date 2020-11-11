@@ -324,6 +324,7 @@ public class Forms {
             }
 
             player.sendMessage("§e§lФлаги были успешно изменены!");
+            region.save();
         });
     }
 
@@ -383,6 +384,7 @@ public class Forms {
             player.sendMessage("§e§lИгрок §6" + p + "§e был успешно добавлен в регион §6" + region.getId() + "§e!");
             if (Server.getInstance().getPlayer(p) != null)
                 Server.getInstance().getPlayer(p).sendMessage("§e§lИгрок §6" + player.getName() + "§e добавил вас в регион §6" + region.getId() + "§e.");
+            region.save();
         });
     }
 
@@ -485,6 +487,7 @@ public class Forms {
             }
 
             region.setRole(p, role);
+            region.save();
         });
     }
 
