@@ -215,7 +215,7 @@ public class Forms {
                     } catch (RegionIsCharacterizedByOtherRegionsException ex) {
                         player.sendMessage("§c§lРегион пересекает чужие регионы.");
                     } catch (InvalidRegionIdException e) {
-                        player.sendMessage("§c§lВ названи и региона присутствуют недопустимые символы.");
+                        player.sendMessage("§c§lВ названии региона присутствуют недопустимые символы.");
                     }
                 });
     }
