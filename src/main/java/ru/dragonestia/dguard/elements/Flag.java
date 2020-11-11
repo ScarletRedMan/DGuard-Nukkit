@@ -1,23 +1,14 @@
 package ru.dragonestia.dguard.elements;
 
-import cn.nukkit.Server;
-import ru.dragonestia.dguard.DGuard;
-
-import java.util.HashMap;
+import cn.nukkit.nbt.tag.CompoundTag;
 
 public class Flag {
 
-    public static HashMap<String, Flag> flags = new HashMap<>();
-
-    public static void register(String id, String name, String description, boolean defaultValue){
-        flags.put(id.toLowerCase().trim(), new Flag(id.toLowerCase().trim(), name.trim(), description.trim(), defaultValue));
-        Server.getInstance().getLogger().info("Флаг '" + id.trim().toLowerCase() + "' был успешно зарегистрирован!");
-    }
-
     private final String id, name, description;
+
     private final boolean defaultValue;
 
-    private Flag(String id, String name, String description, boolean defaultValue){
+    public Flag(String id, String name, String description, boolean defaultValue){
         this.id = id;
         this.name = name;
         this.description = description;
@@ -42,10 +33,9 @@ public class Flag {
 
     public boolean getValue(Region region){
         if(!region.isExist()) return true;
+        CompoundTag flags = region.getFlags();
 
-        if(DGuard.areas.exists(region.getId() + ".flags." + id))
-            return DGuard.areas.getBoolean(region.getId() + ".flags." + id);
-        return defaultValue;
+        return flags.exist(id)? flags.getBoolean(id) : defaultValue;
     }
 
 }

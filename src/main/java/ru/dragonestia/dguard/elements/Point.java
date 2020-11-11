@@ -4,7 +4,6 @@ import cn.nukkit.Player;
 import cn.nukkit.level.Level;
 import cn.nukkit.level.Position;
 import ru.dragonestia.dguard.DGuard;
-import ru.dragonestia.dguard.exceptions.RegionNotFoundException;
 
 import java.util.HashMap;
 
@@ -28,31 +27,17 @@ public class Point {
     }
 
     public Region getRegion(){
-        Region region;
-        for(String id: DGuard.areas.getAll().keySet()){
-            try{
-                region = new Region(id);
-                if(!region.getLevel().equals(level.getName())) continue;
-
-                if(region.getMinPos().x <= x && region.getMinPos().z <= z && x <= region.getMaxPos().x && z <= region.getMaxPos().z) return region;
-            } catch (RegionNotFoundException ignored){
-
-            }
+        for(Region region: DGuard.regions.values()){
+            if(!region.getLevel().equals(level.getName()) || region.xMax < x || region.zMax < z || z < region.zMin || x < region.zMin) continue;
+            return region;
         }
         return null;
     }
 
     public boolean isPrivate(){
-        Region region;
-        for(String id: DGuard.areas.getAll().keySet()){
-            try{
-                region = new Region(id);
-                if(!region.getLevel().equals(level.getName())) continue;
-
-                if(region.getMinPos().x <= x && region.getMinPos().z <= z && x <= region.getMaxPos().x && z <= region.getMaxPos().z) return true;
-            } catch (RegionNotFoundException ignored){
-
-            }
+        for(Region region: DGuard.regions.values()){
+            if(!region.getLevel().equals(level.getName()) || region.xMax < x || region.zMax < z || z < region.zMin || x < region.zMin) continue;
+            return true;
         }
         return false;
     }
@@ -67,12 +52,13 @@ public class Point {
 
     public static boolean isPrivateArea(Point p1, Point p2){
         Point min, max;
+        String levelName = p1.level.getName();
         min = getMin(p1, p2);
         max = getMax(p1, p2);
 
-        for(String id: DGuard.areas.getAll().keySet()){
-            if(!DGuard.areas.getString(id + ".level").equals(p1.level.getName())) continue;
-            if(!(DGuard.areas.getInt(id + ".xMin") > max.x || DGuard.areas.getInt(id + ".xMax") < min.x || DGuard.areas.getInt(id + ".zMin") > max.z || DGuard.areas.getInt(id + ".zMax") < min.z)) return true;
+        for(Region region: DGuard.regions.values()){
+            if(!levelName.equals(region.getLevel())) continue;
+            if(!(region.xMin > max.x || region.xMax < min.x || region.zMin > max.z || region.zMax < min.z)) return true;
         }
         return false;
     }

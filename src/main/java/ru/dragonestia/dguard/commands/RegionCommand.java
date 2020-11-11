@@ -6,19 +6,21 @@ import cn.nukkit.command.CommandSender;
 import cn.nukkit.command.data.CommandParameter;
 import cn.nukkit.level.Position;
 import ru.dragonestia.dguard.DGuard;
-import ru.dragonestia.dguard.Forms;
 import ru.dragonestia.dguard.elements.Point;
-import ru.dragonestia.dguard.elements.Region;
 
 public class RegionCommand extends Command {
 
-    public RegionCommand(){
+    private final DGuard main;
+
+    public RegionCommand(DGuard main){
         super("region", "Управление регионами", "/region", new String[]{"rg"});
 
         getCommandParameters().clear();
-        addCommandParameters("pos", new CommandParameter[]{
-                new CommandParameter("Агрумент", new String[]{"pos1", "pos2"})
+        addCommandParameters("dguard", new CommandParameter[]{
+                new CommandParameter("Агрумент", new String[]{"pos1", "pos2", "info", "edit"})
         });
+
+        this.main = main;
     }
 
     @Override
@@ -29,11 +31,8 @@ public class RegionCommand extends Command {
         }
 
         Player player = (Player) sender;
-
-        if(!DGuard.regionCommandCondition.check(player)) return false;
-
         if(args.length == 0){
-            Forms.getInstance().f_menu(player);
+            main.getForms().f_menu(player);
             return true;
         }
 
@@ -48,12 +47,12 @@ public class RegionCommand extends Command {
                 sender.sendMessage("§6§lВторая точка§e была установлена успешно!");
                 break;
 
-            case "test":
-                Region region = new Point((int) player.x, (int) player.z, player.level).getRegion();
-                if(region == null) return false;
-
-                player.sendMessage(DGuard.areas.get(region.getId()).toString());
-                break;
+            default:
+                sender.sendMessage("§2/rg §f- §7Меню");
+                sender.sendMessage("§2/rg pos1 §f- §7Установить 1 точку");
+                sender.sendMessage("§2/rg pos2§f- §7Установить 2 точку");
+                sender.sendMessage("§2/rg info§f- §7Информация о текущем регионе");
+                sender.sendMessage("§2/rg edit§f- §7Управление текущим регионом");
         }
         return true;
     }

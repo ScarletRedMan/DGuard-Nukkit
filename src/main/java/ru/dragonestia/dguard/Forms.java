@@ -12,10 +12,11 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class Forms {
-    private static Forms instance = new Forms();
 
-    public static Forms getInstance() {
-        return instance;
+    private final DGuard main;
+
+    public Forms(DGuard main){
+        this.main = main;
     }
 
     public void f_menu(Player player) {
@@ -98,9 +99,9 @@ public class Forms {
             guests = "§3" + String.join(" ", region.getGuests()) + "§f";
         }
 
-        String flags = "";
-        for(Flag flag: Flag.flags.values()){
-            flags += " §2" + flag.getName() + "§f - " + (flag.getValue(region)? "§aДа" : "§cНет") +"§f\n";
+        StringBuilder flags = new StringBuilder();
+        for(Flag flag: main.getFlags().values()){
+            flags.append(" §2").append(flag.getName()).append("§f - ").append(flag.getValue(region) ? "§aДа" : "§cНет").append("§f\n");
         }
 
         form.setContent(
@@ -119,7 +120,7 @@ public class Forms {
     public void f_regions_list(Player player) {
         SimpleForm form = new SimpleForm("Ваши регионы");
 
-        List<Region> regions = new RegionManager(player).getRegions();
+        List<Region> regions = new RegionManager(player, main).getRegions();
 
         if (regions.size() == 0) {
             form.setContent("У вас еще нет регионов.")
@@ -189,6 +190,7 @@ public class Forms {
 
                     String input = data.get(1).toString().trim().replace('.', '-');
 
+
                     if (input.length() < 3 || input.length() > 16) {
                         player.sendMessage("§c§lНеверная длина названия региона.");
                         return;
@@ -200,7 +202,7 @@ public class Forms {
                     }
 
                     try {
-                        Region.register(targetPlayer, input, targetPlayer.level.getName(), Point.firstPoints.get(player), Point.secondPoints.get(player));
+                        new RegionManager(player, main).createRegion(input, targetPlayer.level.getName(), Point.firstPoints.get(player), Point.secondPoints.get(player));
                         player.sendMessage("§e§lРегион §6" + input + "§e был успешно создан!");
                     } catch (PointsInDifferentLevelsException ex) {
                         player.sendMessage("§c§lТочки территории находятся в разных мирах.");
@@ -221,7 +223,7 @@ public class Forms {
     public void f_control_list(Player player) {
         SimpleForm form = new SimpleForm("Управление регионами");
 
-        List<Region> regions = new RegionManager(player).getRegions();
+        List<Region> regions = new RegionManager(player, main).getRegions();
 
         if (regions.size() == 0) {
             form.setContent("У вас еще нет регионов.")
@@ -306,7 +308,7 @@ public class Forms {
         CustomForm form = new CustomForm("Управление флагами")
                 .addLabel("Установите нужные параметры установки флагов для региона §b" + region.getId() + "§f.");
 
-        for (Flag flag : Flag.flags.values()) {
+        for (Flag flag : main.getFlags().values()) {
             form.addToggle(flag.getName(), region.getFlag(flag));
         }
 
@@ -315,7 +317,7 @@ public class Forms {
 
             data.remove(0);
 
-            List<Flag> flags = new ArrayList<>(Flag.flags.values());
+            List<Flag> flags = new ArrayList<>(main.getFlags().values());
 
             for (int i = 0; i < data.size(); i++) {
                 region.setFlag(flags.get(i), (boolean) data.get(i));

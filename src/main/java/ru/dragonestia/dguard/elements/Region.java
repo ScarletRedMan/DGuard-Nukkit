@@ -1,25 +1,50 @@
 package ru.dragonestia.dguard.elements;
 
-import cn.nukkit.Player;
+import cn.nukkit.nbt.tag.CompoundTag;
+import cn.nukkit.nbt.tag.ListTag;
+import cn.nukkit.nbt.tag.StringTag;
 import ru.dragonestia.dguard.DGuard;
-import ru.dragonestia.dguard.exceptions.*;
+import ru.dragonestia.dguard.RegionsTag;
+import ru.dragonestia.dguard.task.RegionRemoveTask;
+import ru.dragonestia.dguard.task.RegionSaveTask;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
-import java.util.regex.Pattern;
 
 public class Region {
 
-    private String id;
+    private final DGuard main;
 
-    public Region(String id) throws RegionNotFoundException {
-        this.id = id = id.toLowerCase();
+    private final String id;
 
-        if(!isExist()) throw new RegionNotFoundException();
+    public final int xMin, xMax, zMin, zMax;
+
+    String owner;
+
+    String levelName;
+
+    private final ArrayList<String> members = new ArrayList<>();
+
+    private final ArrayList<String> guests = new ArrayList<>();
+
+    private CompoundTag flags = new CompoundTag();
+
+    private boolean exist;
+
+    Region(String regionName, int xMin, int xMax, int zMin, int zMax, DGuard main) {
+        id = regionName.toLowerCase();
+
+        exist = true;
+        this.main = main;
+        this.xMax = xMax;
+        this.xMin = xMin;
+        this.zMax = zMax;
+        this.zMin = zMin;
     }
 
     public boolean isExist(){
-        return DGuard.areas.exists(id);
+        return exist;
     }
 
     public String getId() {
@@ -27,15 +52,15 @@ public class Region {
     }
 
     public String getLevel(){
-        return DGuard.areas.getString(id + ".level");
+        return levelName;
     }
 
     public Point getMinPos(){
-        return new Point(DGuard.areas.getInt(id + ".xMin"), DGuard.areas.getInt(id + ".zMin"));
+        return new Point(xMin, zMin);
     }
 
     public Point getMaxPos(){
-        return new Point(DGuard.areas.getInt(id + ".xMax"), DGuard.areas.getInt(id + ".zMax"));
+        return new Point(xMax, zMax);
     }
 
     public long getLength(){
@@ -51,15 +76,15 @@ public class Region {
     }
 
     public String getOwner(){
-        return DGuard.areas.getString(id + ".owner");
+        return owner;
     }
 
     public List<String> getMembers(){
-        return new ArrayList<>(DGuard.areas.getStringList(id + ".members"));
+        return members;
     }
 
     public List<String> getGuests(){
-        return new ArrayList<>(DGuard.areas.getStringList(id + ".guests"));
+        return guests;
     }
 
     public Role getRole(String player){
@@ -73,64 +98,48 @@ public class Region {
 
     public void setRole(String player, Role role){
         player = player.toLowerCase();
-        List<String> list;
 
         switch (getRole(player)){
             case Owner:
                 return;
 
             case Member:
-                list = getMembers();
-                list.remove(player);
-
-                DGuard.areas.set(id + ".members", list);
-                DGuard.areas.save(true);
+                members.remove(player);
                 break;
 
             case Guest:
-                list = getGuests();
-                list.remove(player);
-
-                DGuard.areas.set(id + ".guests", list);
-                DGuard.areas.save(true);
+                guests.remove(player);
                 break;
         }
 
         switch (role){
             case Owner:
-                list = getMembers();
-                list.add(getOwner());
-
-                DGuard.areas.set(id + ".owner", player);
-                DGuard.areas.set(id + ".members", list);
-                DGuard.areas.save(true);
+                members.add(getOwner());
+                owner = player;
                 break;
 
             case Member:
-                list = getMembers();
-                if(!list.contains(player)){
-                    list.add(player);
-
-                    DGuard.areas.set(id + ".members", list);
-                    DGuard.areas.save(true);
+                if(!members.contains(player)){
+                    members.add(player);
                 }
                 break;
 
             case Guest:
-                list = getGuests();
-                if(!list.contains(player)){
-                    list.add(player);
-
-                    DGuard.areas.set(id + ".guests", list);
-                    DGuard.areas.save(true);
+                if(!guests.contains(player)){
+                    guests.add(player);
                 }
                 break;
         }
     }
 
     public void remove(){
-        DGuard.areas.remove(id);
-        DGuard.areas.save(true);
+        exist = false;
+        DGuard.regions.remove(id);
+        main.getServer().getScheduler().scheduleAsyncTask(main, new RegionRemoveTask(id, main));
+    }
+
+    CompoundTag getFlags(){
+        return flags;
     }
 
     public boolean getFlag(Flag flag){
@@ -138,45 +147,58 @@ public class Region {
     }
 
     public void setFlag(Flag flag, boolean value){
-        DGuard.areas.set(id + ".flags." + flag.getId(), value);
-        DGuard.areas.save(true);
+        flags.putBoolean(flag.getId(), value);
     }
 
-    public static void register(Player player, String id, String level, Point point1, Point point2) throws RegionLimitCountException, RegionLimitSizeException, InvalidRegionIdException, RegionAlreadyExistException, RegionIsCharacterizedByOtherRegionsException, PointsInDifferentLevelsException {
-        RegionManager regionManager = new RegionManager(player);
+    public void save(RegionsTag regionsTag){
+        CompoundTag compoundTag = new CompoundTag(id);
 
-        if(!DGuard.regionCountChecker.check(player, regionManager.getCount())) throw new RegionLimitCountException();
+        compoundTag.putInt("xMin", xMin);
+        compoundTag.putInt("xMax", xMax);
+        compoundTag.putInt("zMin", zMin);
+        compoundTag.putInt("zMax", zMax);
+        compoundTag.putString("levelName", levelName);
+        compoundTag.putString("owner", owner);
 
-        if(!point1.level.equals(point2.level)) throw new PointsInDifferentLevelsException();
+        ListTag<StringTag> temp = new ListTag<>("members");
+        for(String member: members){
+            temp.add(new StringTag(member));
+        }
+        compoundTag.putList(temp);
 
-        Point min, max;
-        min = Point.getMin(point1, point2);
-        max = Point.getMax(point1, point2);
+        temp = new ListTag<>("guests");
+        for(String guest: guests){
+            temp.add(new StringTag(guest));
+        }
+        compoundTag.putList(temp);
 
-        min.level = max.level = point1.level;
+        CompoundTag flags = new CompoundTag();
+        HashMap<String, Flag> serverFlags = main.getFlags();
+        for(String flagKey: serverFlags.keySet()){
+            flags.putBoolean(flagKey, this.flags.getBoolean(flagKey));
+        }
 
-        if(!DGuard.regionSizeChecker.check(player, (max.x - min.x) * (max.z - min.z))) throw new RegionLimitSizeException();
+        compoundTag.putCompound("flags", flags);
 
-        if(Point.isPrivateArea(min, max)) throw new RegionIsCharacterizedByOtherRegionsException();
+        main.getServer().getScheduler().scheduleAsyncTask(main, new RegionSaveTask(compoundTag, main));
+    }
 
-        id = id.trim().toLowerCase();
+    public static Region read(CompoundTag compoundTag, DGuard main){
+        Region region = new Region(compoundTag.getName(), compoundTag.getInt("xMin"), compoundTag.getInt("xMax"), compoundTag.getInt("zMin"), compoundTag.getInt("zMax"), main);
+        region.levelName = compoundTag.getString("levelName");
+        region.owner = compoundTag.getString("owner");
 
-        Pattern pattern = Pattern.compile("^[aA-zZ\\d]+"); //Регулярка: Присутствуют только символы от a до z(двух регистров) + цифры
-        if(!pattern.matcher(id).matches()) throw new InvalidRegionIdException();
+        for(StringTag tag: compoundTag.getList("members", StringTag.class).getAll()){
+            region.members.add(tag.parseValue());
+        }
 
-        if(DGuard.areas.exists(id)) throw new RegionAlreadyExistException();
+        for(StringTag tag: compoundTag.getList("guests", StringTag.class).getAll()){
+            region.guests.add(tag.parseValue());
+        }
 
-        //Создание региона
-        DGuard.areas.set(id + ".owner", player.getName().toLowerCase());
-        DGuard.areas.set(id + ".members", new ArrayList<String>());
-        DGuard.areas.set(id + ".guests", new ArrayList<String>());
-        DGuard.areas.set(id + ".level", level);
-        DGuard.areas.set(id + ".xMin", min.x);
-        DGuard.areas.set(id + ".zMin", min.z);
-        DGuard.areas.set(id + ".xMax", max.x);
-        DGuard.areas.set(id + ".zMax", max.z);
+        region.flags = compoundTag.getCompound("flags");
 
-        DGuard.areas.save(true);
+        return region;
     }
 
 }

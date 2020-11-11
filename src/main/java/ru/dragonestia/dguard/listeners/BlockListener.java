@@ -1,6 +1,7 @@
 package ru.dragonestia.dguard.listeners;
 
 import cn.nukkit.Player;
+import cn.nukkit.event.Event;
 import cn.nukkit.event.EventHandler;
 import cn.nukkit.event.EventPriority;
 import cn.nukkit.event.Listener;
@@ -12,17 +13,25 @@ import cn.nukkit.event.player.PlayerBedEnterEvent;
 import cn.nukkit.event.player.PlayerBucketEmptyEvent;
 import cn.nukkit.event.player.PlayerBucketFillEvent;
 import cn.nukkit.event.player.PlayerInteractEvent;
+import cn.nukkit.math.Vector3;
 import ru.dragonestia.dguard.DGuard;
-import ru.dragonestia.dguard.elements.Flag;
+import ru.dragonestia.dguard.custom.CustomMethods;
 import ru.dragonestia.dguard.elements.Point;
 import ru.dragonestia.dguard.elements.Region;
 import ru.dragonestia.dguard.elements.Role;
 
 public class BlockListener implements Listener {
 
+    private final DGuard main;
+
+    private final CustomMethods customMethods;
+
     private final int[] blockedItems, doors, chests, furnaces, redstone, other;
 
-    public BlockListener(){
+    public BlockListener(DGuard main){
+        this.main = main;
+        customMethods = main.getCustomMethods();
+
         blockedItems = new int[]{259, 325, 269, 273, 256, 284, 277, 290, 291, 292, 294, 293};
         doors = new int[]{64, 193, 194, 195, 196, 197, 404, 401, 403, 402, 400, 96, 107, 183, 184, 185, 187, 186};
         chests = new int[]{458, 205, 54, 146};
@@ -31,163 +40,87 @@ public class BlockListener implements Listener {
         other = new int[]{138, 449, 117, 125, 23, 468, 154, 84, 83, 149};
     }
 
-    @EventHandler(priority = EventPriority.HIGH)
-    public void onPlace(BlockPlaceEvent event){
+    private boolean checkBuild(Event event, Player player, Vector3 pos){
+        if(event.isCancelled()) return true;
+
+        Region region = new Point((int) pos.x, (int) pos.z, player.getLevel()).getRegion();
+
+        if (region == null) {
+            if (main.isCanBuildOutRegion()) return false;
+
+            player.sendTip("§cЧтобы строить здесь вам нужно создать регион");
+            return true;
+        }
+
+        if (customMethods.canDoAllCondition.check(player)) return false;
+
+        switch (region.getRole(player.getName())) {
+            case Nobody:
+            case Guest:
+                player.sendTip("§cУ вас нет доступа чтобы делать это в данном регионе.");
+                return true;
+
+        }
+        return false;
+    }
+
+    private boolean checkTap(PlayerInteractEvent event, Region region, int[] securedId){
+        if(event.isCancelled()) return true;
         Player player = event.getPlayer();
-        Point point = new Point((int)event.getBlock().x, (int)event.getBlock().z, player.getLevel());
-        Region region = point.getRegion();
 
-        if(region == null){
-            if(!DGuard.config.getBoolean("can-build-out-region")){
-                event.setCancelled();
-                player.sendTip("§cЧтобы строить здесь вам нужно создать регион");
-            }
-        }else{
-            if(!DGuard.canDoAllCondition.check(player))
-            switch (region.getRole(player.getName())){
-                case Nobody:
-                    event.setCancelled();
-                    player.sendTip("§cУ вас нет доступа к данному региону");
-                    break;
-
-                case Guest:
-                    event.setCancelled();
-                    player.sendTip("§cВам не разрешено строить в данном регионе");
-                    break;
+        for(int id: securedId){
+            if(id == event.getBlock().getId()){
+                if(!region.getRole(player.getName()).equals(Role.Nobody) || region.getFlag(main.getFlags().get("furnace")) || !customMethods.canDoAllCondition.check(player)){
+                    player.sendTip("§cУ вас не доступа к данному региону");
+                    return true;
+                }else break;
             }
         }
+        return false;
     }
 
     @EventHandler(priority = EventPriority.HIGH)
-    public void onBreak(BlockBreakEvent event){
-        Player player = event.getPlayer();
-        Point point = new Point((int)event.getBlock().x, (int)event.getBlock().z, player.getLevel());
-        Region region = point.getRegion();
+    public void onPlace(BlockPlaceEvent event) {
+        event.setCancelled(checkBuild(event, event.getPlayer(), event.getBlock()));
+    }
 
-        if(region == null){
-            if(!DGuard.config.getBoolean("can-build-out-region")){
-                event.setCancelled();
-                player.sendTip("§cЧтобы строить здесь вам нужно создать регион");
-            }
-        }else{
-            if(!DGuard.canDoAllCondition.check(player))
-            switch (region.getRole(player.getName())){
-                case Nobody:
-                    event.setCancelled();
-                    player.sendTip("§cУ вас нет доступа к данному региону");
-                    break;
-
-                case Guest:
-                    event.setCancelled();
-                    player.sendTip("§cВам не разрешено строить в данном регионе");
-                    break;
-            }
-        }
+    @EventHandler(priority = EventPriority.HIGH)
+    public void onBreak(BlockBreakEvent event) {
+        event.setCancelled(checkBuild(event, event.getPlayer(), event.getBlock()));
     }
 
     @EventHandler(priority = EventPriority.HIGH)
     public void onBucketEmpty(PlayerBucketEmptyEvent event){
-        Player player = event.getPlayer();
-        Point point = new Point((int)event.getBlockClicked().x, (int)event.getBlockClicked().z, player.getLevel());
-        Region region = point.getRegion();
-
-        if(region == null){
-            if(!DGuard.config.getBoolean("can-build-out-region")){
-                event.setCancelled();
-                player.sendTip("§cЧтобы строить здесь вам нужно создать регион");
-            }
-        }else{
-            if(!DGuard.canDoAllCondition.check(player))
-            switch (region.getRole(player.getName())){
-                case Nobody:
-                    event.setCancelled();
-                    player.sendTip("§cУ вас нет доступа к данному региону");
-                    break;
-
-                case Guest:
-                    event.setCancelled();
-                    player.sendTip("§cВам не разрешено строить в данном регионе");
-                    break;
-            }
-        }
+        event.setCancelled(checkBuild(event, event.getPlayer(), event.getBlockClicked()));
     }
 
     @EventHandler(priority = EventPriority.HIGH)
     public void onBucketFill(PlayerBucketFillEvent event){
-        Player player = event.getPlayer();
-        Point point = new Point((int)event.getBlockClicked().x, (int)event.getBlockClicked().z, player.getLevel());
-        Region region = point.getRegion();
-
-        if(region == null){
-            if(!DGuard.config.getBoolean("can-build-out-region")){
-                event.setCancelled();
-                player.sendTip("§cЧтобы строить здесь вам нужно создать регион");
-            }
-        }else{
-            if(!DGuard.canDoAllCondition.check(player))
-            switch (region.getRole(player.getName())){
-                case Nobody:
-                    event.setCancelled();
-                    player.sendTip("§cУ вас нет доступа к данному региону");
-                    break;
-
-                case Guest:
-                    event.setCancelled();
-                    player.sendTip("§cВам не разрешено строить в данном регионе");
-                    break;
-            }
-        }
+        event.setCancelled(checkBuild(event, event.getPlayer(), event.getBlockClicked()));
     }
 
     @EventHandler(priority = EventPriority.HIGH)
-    public void onBedEnter(PlayerBedEnterEvent event){
+    public void onBedEnter(PlayerBedEnterEvent event) {
         Player player = event.getPlayer();
-        Point point = new Point((int)event.getBed().x, (int)event.getBed().z, player.getLevel());
+        Point point = new Point((int) event.getBed().x, (int) event.getBed().z, player.getLevel());
         Region region = point.getRegion();
 
-        if(region != null){
-            if (region.getRole(player.getName()) == Role.Nobody && !DGuard.canDoAllCondition.check(player)) {
-                event.setCancelled();
-                player.sendTip("§cУ вас нет доступа к данному региону");
-            }
+        if (region == null) return;
+
+        if (region.getRole(player.getName()) == Role.Nobody && !customMethods.canDoAllCondition.check(player)) {
+            event.setCancelled(true);
+            player.sendTip("§cУ вас нет доступа к данному региону");
         }
     }
 
     @EventHandler(priority = EventPriority.HIGH)
     public void onFrameDropItem(ItemFrameDropItemEvent event){
-        Player player = event.getPlayer();
-        Point point = new Point((int)event.getItemFrame().x, (int)event.getItemFrame().z, player.getLevel());
-        Region region = point.getRegion();
-
-        if(region == null){
-            if(!DGuard.config.getBoolean("can-build-out-region")){
-                event.setCancelled();
-                player.sendTip("§cЧтобы строить здесь вам нужно создать регион");
-            }
-        }else{
-            if(!DGuard.canDoAllCondition.check(player))
-            switch (region.getRole(player.getName())){
-                case Nobody:
-                    event.setCancelled();
-                    player.sendTip("§cУ вас нет доступа к данному региону");
-                    break;
-
-                case Guest:
-                    event.setCancelled();
-                    player.sendTip("§cВам не разрешено строить в данном регионе");
-                    break;
-            }
-        }
+        event.setCancelled(checkBuild(event, event.getPlayer(), event.getBlock()));
     }
 
     @EventHandler(priority = EventPriority.HIGH)
     public void onBurn(BlockBurnEvent event){
-        Point point = new Point((int)event.getBlock().x, (int)event.getBlock().z, event.getBlock().getLevel());
-        Region region = point.getRegion();
-
-        if(region != null){
-            event.setCancelled();
-        }
+        event.setCancelled(true);
     }
 
     @EventHandler(priority = EventPriority.HIGH)
@@ -199,16 +132,12 @@ public class BlockListener implements Listener {
         Region region = point.getRegion();
 
         if(region == null){
-            if(!DGuard.config.getBoolean("can-build-out-region") && !DGuard.canDoAllCondition.check(player)){
-                event.setCancelled();
-                player.sendTip("§cЧтобы строить здесь вам нужно создать регион");
-            }
             return;
         }
 
         for(int id: blockedItems){
             if(id == player.getInventory().getItemInHand().getId()){
-                if(region.getRole(player.getName()).getId() < Role.Member.getId() && !DGuard.canDoAllCondition.check(player)){
+                if(region.getRole(player.getName()).getId() < Role.Member.getId() && !customMethods.canDoAllCondition.check(player)){
                     player.sendTip("§cУ вас не доступа к данному региону");
                     event.setCancelled(true);
                     return;
@@ -218,7 +147,7 @@ public class BlockListener implements Listener {
 
         for(int id: doors){
             if(id == event.getBlock().getId()){
-                if(region.getRole(player.getName()).equals(Role.Nobody) && !region.getFlag(Flag.flags.get("doors")) && !DGuard.canDoAllCondition.check(player)){
+                if(region.getRole(player.getName()).equals(Role.Nobody) && !region.getFlag(main.getFlags().get("doors")) && !customMethods.canDoAllCondition.check(player)){
                     player.sendTip("§cУ вас не доступа к данному региону");
                     event.setCancelled(true);
                     return;
@@ -226,35 +155,7 @@ public class BlockListener implements Listener {
             }
         }
 
-        for(int id: chests){
-            if(id == event.getBlock().getId()){
-                if(region.getRole(player.getName()).equals(Role.Nobody) && !region.getFlag(Flag.flags.get("chests")) && !DGuard.canDoAllCondition.check(player)){
-                    player.sendTip("§cУ вас не доступа к данному региону");
-                    event.setCancelled(true);
-                    return;
-                }else break;
-            }
-        }
-
-        for(int id: furnaces){
-            if(id == event.getBlock().getId()){
-                if(region.getRole(player.getName()).equals(Role.Nobody) && !region.getFlag(Flag.flags.get("furnace")) && !DGuard.canDoAllCondition.check(player)){
-                    player.sendTip("§cУ вас не доступа к данному региону");
-                    event.setCancelled(true);
-                    return;
-                }else break;
-            }
-        }
-
-        for(int id: redstone){
-            if(id == event.getBlock().getId()){
-                if(region.getRole(player.getName()).equals(Role.Nobody) && !region.getFlag(Flag.flags.get("furnace")) && !DGuard.canDoAllCondition.check(player)){
-                    player.sendTip("§cУ вас не доступа к данному региону");
-                    event.setCancelled(true);
-                    return;
-                }else break;
-            }
-        }
+        event.setCancelled(checkTap(event, region, chests) || checkTap(event, region, furnaces) || checkTap(event, region, redstone));
     }
 
 }

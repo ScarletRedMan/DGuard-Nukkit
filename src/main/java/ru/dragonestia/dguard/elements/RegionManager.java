@@ -2,17 +2,22 @@ package ru.dragonestia.dguard.elements;
 
 import cn.nukkit.Player;
 import ru.dragonestia.dguard.DGuard;
-import ru.dragonestia.dguard.exceptions.RegionNotFoundException;
+import ru.dragonestia.dguard.custom.CustomMethods;
+import ru.dragonestia.dguard.exceptions.*;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.regex.Pattern;
 
 public class RegionManager {
 
-    private Player player;
+    private final Player player;
 
-    public RegionManager(Player player){
+    private final DGuard main;
+
+    public RegionManager(Player player, DGuard main){
         this.player = player;
+        this.main = main;
     }
 
     public Player getPlayer() {
@@ -21,14 +26,11 @@ public class RegionManager {
 
     public List<Region> getRegions(){
         List<Region> list = new ArrayList<>();
+        String name = player.getName().toLowerCase();
 
-        for(String id: DGuard.areas.getAll().keySet()){
-            if(DGuard.areas.getString(id + ".owner").equals(player.getName().toLowerCase())){
-                try{
-                    list.add(new Region(id));
-                } catch (RegionNotFoundException ignore){
-
-                }
+        for(Region region: DGuard.regions.values()){
+            if(name.equals(region.getOwner())){
+                list.add(region);
             }
         }
 
@@ -36,7 +38,45 @@ public class RegionManager {
     }
 
     public int getCount(){
-        return getRegions().size();
+        int count = 0;
+        String name = player.getName().toLowerCase();
+
+        for(Region region: DGuard.regions.values()){
+            if(name.equals(region.getOwner())) ++count;
+        }
+        return count;
+    }
+
+    public void createRegion(String id, String level, Point point1, Point point2) throws RegionLimitCountException, RegionLimitSizeException, InvalidRegionIdException, RegionAlreadyExistException, RegionIsCharacterizedByOtherRegionsException, PointsInDifferentLevelsException {
+        CustomMethods customMethods = main.getCustomMethods();
+
+        if(!customMethods.regionCountChecker.check(player, getCount())) throw new RegionLimitCountException();
+
+        if(!point1.level.equals(point2.level)) throw new PointsInDifferentLevelsException();
+
+        Point min, max;
+        min = Point.getMin(point1, point2);
+        max = Point.getMax(point1, point2);
+
+        min.level = max.level = point1.level;
+
+        if(!customMethods.regionSizeChecker.check(player, (max.x - min.x) * (max.z - min.z))) throw new RegionLimitSizeException();
+
+        if(Point.isPrivateArea(min, max)) throw new RegionIsCharacterizedByOtherRegionsException();
+
+        id = id.trim().toLowerCase();
+
+        Pattern pattern = Pattern.compile("^[aA-zZ\\d]+");
+        if(!pattern.matcher(id).matches()) throw new InvalidRegionIdException();
+
+        if(DGuard.regions.containsKey(id)) throw new RegionAlreadyExistException();
+
+        Region region = new Region(id, min.x, max.x, min.z, max.z, main);
+        region.owner = player.getName().toLowerCase();
+        region.levelName = level.toLowerCase();
+
+        DGuard.regions.put(id, region);
+        region.save(main.getRegionsTag());
     }
 
 }
