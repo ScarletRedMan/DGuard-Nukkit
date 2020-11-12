@@ -64,13 +64,13 @@ public class BlockListener implements Listener {
         return false;
     }
 
-    private boolean checkTap(PlayerInteractEvent event, Region region, int[] securedId){
+    private boolean checkTap(PlayerInteractEvent event, Region region, int[] securedId, String flagName){
         if(event.isCancelled()) return true;
         Player player = event.getPlayer();
 
         for(int id: securedId){
             if(id == event.getBlock().getId()){
-                if(!region.getRole(player.getName()).equals(Role.Nobody) || region.getFlag(main.getFlags().get("furnace")) || !customMethods.canDoAllCondition.check(player)){
+                if(region.getRole(player.getName()).equals(Role.Nobody) && !region.getFlag(main.getFlags().get(flagName)) && !customMethods.canDoAllCondition.check(player)){
                     player.sendTip("§cУ вас не доступа к данному региону");
                     return true;
                 }else break;
@@ -155,7 +155,7 @@ public class BlockListener implements Listener {
             }
         }
 
-        event.setCancelled(checkTap(event, region, chests) || checkTap(event, region, furnaces) || checkTap(event, region, redstone));
+        event.setCancelled(checkTap(event, region, chests, "chests") || checkTap(event, region, furnaces, "furnace") || checkTap(event, region, redstone, "redstone"));
     }
 
 }
