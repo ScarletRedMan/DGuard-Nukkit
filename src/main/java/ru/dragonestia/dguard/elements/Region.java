@@ -161,13 +161,13 @@ public class Region {
 
         ListTag<StringTag> temp = new ListTag<>("members");
         for(String member: members){
-            temp.add(new StringTag(member));
+            temp.add(new StringTag("members", member));
         }
         compoundTag.putList(temp);
 
         temp = new ListTag<>("guests");
         for(String guest: guests){
-            temp.add(new StringTag(guest));
+            temp.add(new StringTag("guests", guest));
         }
         compoundTag.putList(temp);
 
