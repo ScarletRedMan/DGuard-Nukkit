@@ -260,7 +260,7 @@ public class Forms {
 
         List<SelectableElement> players = new ArrayList<>();
         for (Player p: player.getLevel().getPlayers().values()) {
-            if (p.distanceSquared(player) > 50 || !region.getRole(p.getName()).equals(Role.Nobody)) continue;
+            if (p.distanceSquared(player) > 50 * 50 || !region.getRole(p.getName()).equals(Role.Nobody)) continue;
             players.add(new SelectableElement(p.getName(), p));
         }
 
