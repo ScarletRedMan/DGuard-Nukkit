@@ -2,49 +2,50 @@ package ru.dragonestia.dguard;
 
 import cn.nukkit.plugin.PluginBase;
 import cn.nukkit.utils.Config;
+import com.google.gson.Gson;
+import com.google.gson.stream.JsonReader;
+import lombok.Getter;
+import lombok.SneakyThrows;
 import ru.dragonestia.dguard.commands.RegionCommand;
 import ru.dragonestia.dguard.custom.CustomMethods;
-import ru.dragonestia.dguard.elements.Flag;
-import ru.dragonestia.dguard.elements.Region;
 import ru.dragonestia.dguard.listeners.BlockListener;
 import ru.dragonestia.dguard.listeners.PlayerListener;
+import ru.dragonestia.dguard.region.Flag;
+import ru.dragonestia.dguard.region.Region;
+import ru.dragonestia.dguard.util.Point;
 
 import java.io.File;
-import java.io.IOException;
+import java.io.FileReader;
 import java.util.HashMap;
+import java.util.Objects;
 
 public class DGuard extends PluginBase {
 
-    private Config config;
+    public static final Gson gson = new Gson();
+    @Getter private static DGuard instance;
 
-    public static CustomMethods customMethods;
-
-    public static final HashMap<String, Region> regions = new HashMap<>();
-
+    public static final HashMap<String, HashMap<Integer, Region>> regions = new HashMap<>();
     private final HashMap<String, Flag> flags = new HashMap<>();
-
-    private int regionMaxCount, regionMaxSize;
-
-    private boolean canBuildOutRegion;
-
-    private RegionsTag regionsTag;
-
-    private final Forms forms = new Forms(this);
+    @Getter private Settings settings;
+    @Getter private CustomMethods customMethods;
+    @Getter private Forms forms;
+    @Getter private HashMap<Long, Point> firstPoints;
+    @Getter private HashMap<Long, Point> secondPoints;
 
     @Override
     public void onLoad() {
-        regionsTag = new RegionsTag(this);
-        config = new Config("plugins/DGuard/config.yml", Config.YAML);
+        instance = this;
+
+        firstPoints = new HashMap<>();
+        secondPoints = new HashMap<>();
+
+        settings = new Settings(this);
+        settings.init();
+
         customMethods = new CustomMethods(this);
+        customMethods.init();
 
-        if(!config.exists("max-count")) config.set("max-count", 2);
-        if(!config.exists("max-size")) config.set("max-size", 10000);
-        if(!config.exists("can-build-out-region")) config.set("can-build-out-region", true);
-        config.save();
-
-        regionMaxCount = config.getInt("max-count");
-        regionMaxSize = config.getInt("max-size");
-        canBuildOutRegion = config.getBoolean("can-build-out-region");
+        forms = new Forms(this);
     }
 
     @Override
@@ -58,58 +59,42 @@ public class DGuard extends PluginBase {
         registerFlag("chests", "Свободное открытие сундуков", "Возможность другим игрокоам взаимодействовать с сундуками", false);
         registerFlag("furnace", "Свободное открытие печек", "Возможность другим игрокам свободно взаимодействовать с печками", false);
         registerFlag("pvp", "Режим PvP", "Возможность драться с другими игроками", false);
-        registerFlag("redstone", "Использование кнопок", "Возможность нажимать кнопки", false);
+        registerFlag("redstone", "Использование кнопок", "Возможность использовать механизмы", false);
 
         loadRegions();
     }
 
-    public void loadRegions(){
-        Region region;
-        for(File file: regionsTag.getFiles()){
-            try {
-                region = Region.read(regionsTag.readFile(file), this);
-                regions.put(region.getId(), region);
-            } catch (IOException ex){
-                getLogger().error("Не удалось загрузить регион из файла " + file.getName());
-                ex.printStackTrace();
-            }
+    @Override
+    public void onDisable() {
+        Config config = new Config("plugins/DGuard/increment", Config.YAML);
+        config.set("i", Region.freeId);
+        config.save();
+    }
+
+    @SneakyThrows
+    private void loadRegions(){
+        File regionsDir = new File("plugins/DGuard/regions");
+        regionsDir.mkdir();
+
+        Config config = new Config("plugins/DGuard/increment", Config.YAML);
+        if(!config.exists("i")) config.set("i", 1);
+        config.save();
+        Region.freeId = config.getInt("i");
+
+        for(File regionFile: Objects.requireNonNull(regionsDir.listFiles())){
+            if(!regionFile.isFile()) continue;
+
+            Region region = gson.fromJson(new JsonReader(new FileReader(regionFile)), Region.class);
+            region.init(this);
         }
-    }
-
-    public CustomMethods getCustomMethods() {
-        return customMethods;
-    }
-
-    public Config getSettingsConfig() {
-        return config;
-    }
-
-    public boolean isCanBuildOutRegion() {
-        return canBuildOutRegion;
-    }
-
-    public int getRegionMaxCount() {
-        return regionMaxCount;
-    }
-
-    public int getRegionMaxSize() {
-        return regionMaxSize;
     }
 
     public void registerFlag(String id, String name, String description, boolean defaultValue){
         flags.put(id.toLowerCase().trim(), new Flag(id.toLowerCase().trim(), name.trim(), description.trim(), defaultValue));
     }
 
-    public Forms getForms(){
-        return forms;
-    }
-
     public HashMap<String, Flag> getFlags() {
         return flags;
-    }
-
-    public RegionsTag getRegionsTag() {
-        return regionsTag;
     }
 
 }

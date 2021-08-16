@@ -4,6 +4,6 @@ import cn.nukkit.Player;
 
 public interface RegionSizeChecker {
 
-    public boolean check(Player player, long size);
+    boolean check(Player player, long size);
 
 }

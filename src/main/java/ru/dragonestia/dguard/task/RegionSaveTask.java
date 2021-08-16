@@ -1,32 +1,33 @@
 package ru.dragonestia.dguard.task;
 
-import cn.nukkit.nbt.tag.CompoundTag;
 import cn.nukkit.scheduler.AsyncTask;
+import lombok.SneakyThrows;
 import ru.dragonestia.dguard.DGuard;
-import ru.dragonestia.dguard.RegionsTag;
+import ru.dragonestia.dguard.region.Region;
 
-import java.io.IOException;
+import java.io.File;
+import java.io.FileWriter;
 
 public class RegionSaveTask extends AsyncTask {
 
-    private final CompoundTag compoundTag;
-
+    private final Region region;
     private final DGuard main;
 
-    public RegionSaveTask(CompoundTag compoundTag, DGuard main){
-        this.compoundTag = compoundTag;
+    public RegionSaveTask(Region region, DGuard main){
+        this.region = region;
         this.main = main;
     }
 
+    @SneakyThrows
     @Override
     public void onRun() {
-        RegionsTag regionsTag = main.getRegionsTag();
+        String json = DGuard.gson.toJson(region);
+        File file = new File("plugins/DGuard/regions/"+region.getId()+".json");
 
-        try {
-            regionsTag.set(compoundTag.getName(), compoundTag);
-        } catch (IOException ex){
-            main.getLogger().error("Не удалось сохранить регион " + compoundTag.getName());
-            ex.printStackTrace();
+        if(!file.exists()) file.createNewFile();
+
+        try(FileWriter writer = new FileWriter(file)){
+            writer.write(json);
         }
     }
 

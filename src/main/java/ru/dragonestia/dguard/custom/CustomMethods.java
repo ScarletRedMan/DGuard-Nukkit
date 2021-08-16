@@ -1,30 +1,24 @@
 package ru.dragonestia.dguard.custom;
 
-import cn.nukkit.Player;
+import lombok.Getter;
 import ru.dragonestia.dguard.DGuard;
 
 public class CustomMethods {
 
-    private final DGuard main;
+    @Getter private final DGuard main;
 
     public CanDoAllCondition canDoAllCondition;
-
-    public RegionCommandCondition regionCommandCondition;
-
     public RegionCountChecker regionCountChecker;
-
     public RegionSizeChecker regionSizeChecker;
 
     public CustomMethods(DGuard main){
         this.main = main;
-
-        init();
     }
 
-    private void init(){
-        canDoAllCondition = Player::isOp;
-        regionCountChecker = (player, count) -> main.getSettingsConfig().getInt("max-count") > count || canDoAllCondition.check(player);
-        regionSizeChecker = (player, size) -> main.getSettingsConfig().getLong("max-size") > size || canDoAllCondition.check(player);
+    public void init(){
+        canDoAllCondition = player -> player.hasPermission("dguard.admin");
+        regionCountChecker = (player, count) -> main.getSettings().getRegionMaxCount() > count || player.hasPermission("dguard.count") ||canDoAllCondition.check(player);
+        regionSizeChecker = (player, size) -> main.getSettings().getRegionMaxSize() > size || player.hasPermission("dguard.size") || canDoAllCondition.check(player);
     }
 
 }

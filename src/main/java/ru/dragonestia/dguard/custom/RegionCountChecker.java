@@ -4,6 +4,6 @@ import cn.nukkit.Player;
 
 public interface RegionCountChecker {
 
-    public boolean check(Player player, int count);
+    boolean check(Player player, int count);
 
 }

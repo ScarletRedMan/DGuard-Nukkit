@@ -2,11 +2,17 @@ package ru.dragonestia.dguard;
 
 import cn.nukkit.Player;
 import cn.nukkit.Server;
-import ru.dragonestia.dguard.elements.*;
-import ru.dragonestia.dguard.exceptions.*;
-import ru.nukkitx.forms.elements.CustomForm;
-import ru.nukkitx.forms.elements.ImageType;
-import ru.nukkitx.forms.elements.SimpleForm;
+import ru.contentforge.formconstructor.form.CustomForm;
+import ru.contentforge.formconstructor.form.ModalForm;
+import ru.contentforge.formconstructor.form.SimpleForm;
+import ru.contentforge.formconstructor.form.element.*;
+import ru.dragonestia.dguard.exceptions.RegionException;
+import ru.dragonestia.dguard.region.Flag;
+import ru.dragonestia.dguard.region.PlayerRegionManager;
+import ru.dragonestia.dguard.region.Region;
+import ru.dragonestia.dguard.region.Role;
+import ru.dragonestia.dguard.util.Area;
+import ru.dragonestia.dguard.util.Point;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -19,44 +25,27 @@ public class Forms {
         this.main = main;
     }
 
-    public void f_menu(Player player) {
-        new SimpleForm("Меню").addButton("Управление регионами", ImageType.PATH, "textures/items/book_writable")
-                .addButton("Создать регион", ImageType.PATH, "textures/items/campfire")
-                .addButton("Мои регионы", ImageType.PATH, "textures/items/book_normal")
-                .addButton("Информация о регионе", ImageType.PATH, "textures/items/map_empty")
-                .addButton("Гайд", ImageType.PATH, "textures/items/book_portfolio")
-                .send(player, (targetPlayer, form, data) -> {
-                    switch (data) {
-                        case 0: //Управление регионами
-                            f_control_list(player);
-                            break;
+    public void sendMainForm(Player player) {
+        Region region = new Point(player).getRegion(player.getLevel());
 
-                        case 1: //Создать регион
-                            f_create_region_menu(player);
-                            break;
+        SimpleForm form = new SimpleForm("Меню")
+                .addButton("Управление регионами", ImageType.PATH, "textures/items/book_writable", (p, b) -> sendOwnRegionsForm(player))
+                .addButton("Создать регион", ImageType.PATH, "textures/items/campfire", (p, b) -> sendPreCreateForm(player))
+                .addButton("Мои регионы", ImageType.PATH, "textures/items/book_normal", (p, b) -> sendRegionsListForm(player));
 
-                        case 2: //Мои регионы
-                            f_regions_list(player);
-                            break;
+        if(region != null){
+             form.addButton("Информация о текущем регионе", ImageType.PATH, "textures/items/map_empty", (p, b) -> sendRegionInfoForm(player, region));
 
-                        case 3: //Информация о регионе
-                            Region region = new Point(player.getFloorX(), player.getFloorZ(), player.getLevel()).getRegion();
+             if(region.getOwner().equalsIgnoreCase(player.getName())){
+                 form.addButton("Управление текущим регионом", ImageType.PATH, "textures/gui/newgui/Realms", (p, b) -> sendEditRegionMenuForm(p, region));
+             }
+        }
 
-                            if (region == null) {
-                                player.sendMessage("§e§lВ данном несте нет региона.");
-                                return;
-                            }
-                            f_region_info(player, region);
-                            break;
-
-                        case 4: //Туториал
-                            f_guide(player);
-                            break;
-                    }
-                });
+        form.addButton("Гайд", ImageType.PATH, "textures/items/book_portfolio", (p, b) -> sendGuideForm(player))
+                .send(player);
     }
 
-    public void f_guide(Player player) {
+    public void sendGuideForm(Player player) {
         new SimpleForm("Гайд")
                 .setContent("§l§6Инструкция по созданию региона:§r§f\n" +
                         " Чтобы создать регион нужно сначала выделить крайние точки, которой будут служить границой региона. Отметить точки можно с помощью команд §b/rg pos1§f и §b/rg pos2§f. " +
@@ -71,21 +60,17 @@ public class Forms {
                         " - §bГость§f - Может только взаимодействовать с печками, сундуками и дверьми. Хорошо подойдет для приюченных игроков.\n" +
                         " - §bЖитель§f - Может строить в привате, также взаимодействовать с сундуками, печками и дверями. Добавлять только на свой страх и риск, ведь администрация не несет ответственности за разрушенный дом.\n" +
                         " - §bВладелец§f - Полностью управляет регионом, выдает роли другим игрокам в регионе.")
-                .addButton("Назад")
-                .send(player, (targetPlayer, form, data) -> {
-                    if (data == -1) return;
-
-                    f_menu(player);
-                });
+                .addButton("Назад", (p, b) -> sendMainForm(player))
+                .send(player);
     }
 
-    public void f_region_info(Player player, Region region) {
-        if (!region.isExist()) {
+    public void sendRegionInfoForm(Player player, Region region) {
+        if (region.isClosed()) {
             player.sendMessage("§cРегион не найден!");
             return;
         }
 
-        SimpleForm form = new SimpleForm("Регион " + region.getId());
+        SimpleForm form = new SimpleForm("Регион " + region.getName());
 
         String members, guests;
 
@@ -104,12 +89,13 @@ public class Forms {
             flags.append(" §2").append(flag.getName()).append("§f - ").append(flag.getValue(region) ? "§aДа" : "§cНет").append("§f\n");
         }
 
+        Area area = region.getArea();
         form.setContent(
-                "§lИнформация о регионе §d" + region.getId() + "§f:§r\n" +
+                "§lИнформация о регионе §d" + region.getName() + "§f(id: §7" + region.getId() + "§f):§r\n" +
                         " §fВладелец региона: §e" + region.getOwner() + "§f\n" +
                         " §fЖители региона: " + members + "§f.\n" +
                         " §fГости: " + guests + "§f.\n" +
-                        " §fПлощадь региона: §b" + region.getSize() + "§f(§e" + region.getLength() +"§6x§e" + region.getWeight() + ")\n" +
+                        " §fПлощадь региона: §b" + area.getSpace(main.getSettings().is_3d()) + "§f(§e" + area.deltaX() + (main.getSettings().is_3d()? ("§6x§e" + area.deltaY()) : "") + "§6x§e" + area.deltaZ() + ")\n" +
                         "\n§l§fФлаги:§r\n" + flags
         );
 
@@ -117,279 +103,188 @@ public class Forms {
 
     }
 
-    public void f_regions_list(Player player) {
+    public void sendRegionsListForm(Player player) {
         SimpleForm form = new SimpleForm("Ваши регионы");
 
-        List<Region> regions = new RegionManager(player, main).getRegions();
+        List<Region> regions = new PlayerRegionManager(player, main).getRegions();
 
         if (regions.size() == 0) {
             form.setContent("У вас еще нет регионов.")
-                    .addButton("Назад")
-                    .send(player, (targetPlayer, targetForm, data) -> {
-                        if (data == -1) return;
-
-                        f_menu(player);
-                    });
+                    .addButton("Назад", (p, b) -> sendMainForm(player))
+                    .send(player);
 
             return;
         }
 
         form.setContent("Выберите регион, который информацию которого вы хотите посмотреть.");
 
-        for (Region region : regions) {
-            form.addButton(region.getId(), ImageType.PATH, "textures/items/campfire");
+        for (Region region: regions) {
+            form.addButton("§l" + region.getName() + "\n§r§8(id: "+region.getId()+")", ImageType.PATH, "textures/items/campfire", (p, b) -> sendRegionInfoForm(player, region));
 
         }
-        form.addButton("Назад")
-                .send(player, (targetPlayer, targetForm, data) -> {
-                    if (data == -1) return;
-
-                    if (regions.size() == data) {
-                        f_menu(player);
-                        return;
-                    }
-
-                    f_region_info(player, regions.get(data));
-                });
+        form.addButton("Назад", (p, b) -> sendMainForm(player))
+                .send(player);
     }
 
-    public void f_create_region_menu(Player player) {
+    public void sendPreCreateForm(Player player) {
         new SimpleForm("Создание региона")
                 .setContent(
                         "Установите 2 точки, которые будут выделять территорию для создания региона. Далее можно будет создавать регион.\n" +
                                 "\n" +
-                                "Просто нажимайте деревянным топором по блоам чтобы устанавливать точки.\n" +
-                                "\n" +
-                                "Также можно с помощью команд §b/rg pos1§f и §b/rg pos2§f." +
-                                "\n" +
-                                "Примечание: §3Регион создается во всю высоту, а блоки расчитываются по площади территории.§f"
+                                "Просто выделяйте крайние точки с помощью команд §b/rg pos1§f и §b/rg pos2§f.\n" +
+                                (main.getSettings().is_3d()? "" : "\nПримечание: §3Регион создается во всю высоту, а блоки расчитываются по площади территории.§f")
                 )
-                .addButton("Создать регион", ImageType.PATH, "textures/items/campfire")
-                .addButton("Назад")
-                .send(player, (targetPlayer, form, data) -> {
-                    if (data == -1) return;
-
-                    switch (data) {
-                        case 0:
-                            f_create_region(player);
-                            break;
-
-                        case 1:
-                            f_menu(player);
-                            break;
-                    }
-                });
+                .addButton("Создать регион", ImageType.PATH, "textures/items/campfire", (p, b) -> sendCreateRegionForm(player))
+                .addButton("Назад", (p, b) -> sendMainForm(player))
+                .send(player);
     }
 
-    public void f_create_region(Player player) {
+    public void sendCreateRegionForm(Player player) {
         new CustomForm("Создание региона")
-                .addLabel("Укажите желаемое название региона. Использовать можно только латинские буквы и цифры. Не использовать пробелы!")
-                .addInput("Название региона", "Название региона. Например: " + player.getName())
-                .send(player, (targetPlayer, form, data) -> {
-                    if (data == null) return;
-
-                    String input = data.get(1).toString().trim().replace('.', '-');
+                .addElement("Укажите желаемое название региона. Допустимы абсолютно любые символы.")
+                .addElement("rg-name", new Input("Название региона", "Название региона. Например: " + player.getName()))
+                .setHandler((p, response) -> {
+                    String regionName = response.getInput("rg-name").getValue().trim().replace('.', '-');
 
 
-                    if (input.length() < 3 || input.length() > 16) {
+                    if (regionName.length() < 3 || regionName.length() > 16) {
                         player.sendMessage("§c§lНеверная длина названия региона.");
                         return;
                     }
 
-                    if (!(Point.firstPoints.containsKey(player) && Point.secondPoints.containsKey(player))) {
+                    if (!(main.getFirstPoints().containsKey(p.getId()) && main.getSecondPoints().containsKey(p.getId()))) {
                         player.sendMessage("§c§lВы не выделили территорию чтобы создать регион.");
                         return;
                     }
 
+                    Area area = new Area(main.getFirstPoints().get(p.getId()), main.getSecondPoints().get(p.getId()));
+
                     try {
-                        new RegionManager(player, main).createRegion(input, targetPlayer.level.getName(), Point.firstPoints.get(player), Point.secondPoints.get(player));
-                        player.sendMessage("§e§lРегион §6" + input + "§e был успешно создан!");
-                    } catch (PointsInDifferentLevelsException ex) {
-                        player.sendMessage("§c§lТочки территории находятся в разных мирах.");
-                    } catch (RegionAlreadyExistException ex) {
-                        player.sendMessage("§c§lРегион с таким названием уже существует!");
-                    } catch (RegionLimitCountException ex) {
-                        player.sendMessage("§c§lВы сейчас владеете максимальным количеством регионов.");
-                    } catch (RegionLimitSizeException ex) {
-                        player.sendMessage("§c§lВы выделили слишком большую территорию для региона.");
-                    } catch (RegionIsCharacterizedByOtherRegionsException ex) {
-                        player.sendMessage("§c§lРегион пересекает чужие регионы.");
-                    } catch (InvalidRegionIdException e) {
-                        player.sendMessage("§c§lВ названии региона присутствуют недопустимые символы.");
+                        new PlayerRegionManager(player, main).createRegion(regionName, area, p.getLevel());
+                        player.sendMessage("§e§lРегион §6" + regionName + "§e был успешно создан!");
+                    } catch (RegionException ex) {
+                        player.sendMessage("§c§l"+ex.getMessage()+".");
                     }
-                });
+                }).send(player);
     }
 
-    public void f_control_list(Player player) {
+    public void sendOwnRegionsForm(Player player) {
         SimpleForm form = new SimpleForm("Управление регионами");
 
-        List<Region> regions = new RegionManager(player, main).getRegions();
+        List<Region> regions = new PlayerRegionManager(player, main).getRegions();
 
         if (regions.size() == 0) {
             form.setContent("У вас еще нет регионов.")
-                    .addButton("Назад")
-                    .send(player, (targetPlayer, targetForm, data) -> {
-                        if (data == -1) return;
-
-                        f_menu(player);
-                    });
-
+                    .addButton("Назад", (p, b) -> sendMainForm(player))
+                    .send(player);
             return;
         }
 
         form.setContent("Выберите регион, который хотите редактировать.");
 
         for (Region region : regions) {
-            form.addButton(region.getId(), ImageType.PATH, "textures/items/campfire");
+            form.addButton("§r" + region.getName() + "\n§r§8(id: "+region.getId()+")", ImageType.PATH, "textures/items/campfire", (p, b) -> sendEditRegionMenuForm(player, region));
         }
 
-        form.addButton("Назад")
-                .send(player, (targetPlayer, targetForm, data) -> {
-                    if (data == -1) return;
-
-                    if (regions.size() == data) {
-                        f_menu(player);
-                        return;
-                    }
-
-                    f_edit_menu(player, regions.get(data));
-                });
+        form.addButton("Назад", (p, b) -> sendMainForm(player))
+                .send(player);
     }
 
-    public void f_edit_menu(Player player, Region region) {
-        if (!region.isExist()) {
+    public void sendEditRegionMenuForm(Player player, Region region) {
+        if (region.isClosed()) {
             player.sendMessage("§cРегион не найден!");
             return;
         }
 
-        SimpleForm form = new SimpleForm("Управление регионом " + region.getId());
+        SimpleForm form = new SimpleForm("Управление регионом " + region.getName());
 
         form.setContent("Выберите нужное вам действие, которое хотите применить к данному региону.")
-                .addButton("Флаги региона", ImageType.PATH, "textures/items/repeater")
-                .addButton("Управление игроками", ImageType.PATH, "textures/items/name_tag")
-                .addButton("Добавить игрока", ImageType.PATH, "textures/items/cake")
-                .addButton("Удалить регион", ImageType.PATH, "textures/items/blaze_powder")
-                .addButton("Назад");
+                .addButton("Флаги региона", ImageType.PATH, "textures/items/repeater", (p, b) -> sendEditionFlagsForm(player, region))
+                .addButton("Управление игроками", ImageType.PATH, "textures/items/name_tag", (p, b) -> sendEditPlayersForm(player, region))
+                .addButton("Добавить игрока", ImageType.PATH, "textures/items/cake", (p, b) -> sendAddUserForm(player, region))
+                .addButton("Удалить регион", ImageType.PATH, "textures/items/blaze_powder", (p, b) -> sendDeleteRegionForm(player, region))
+                .addButton("Назад", (p, b) -> sendOwnRegionsForm(player));
 
-        form.send(player, (targetPlayer, targetForm, data) -> {
-            if (data == -1) return;
-
-            switch (data) {
-                case 0: //Флаги региона
-                    f_edit_flag(player, region);
-                    break;
-
-                case 1: //Управление игроками
-                    f_edit_players(player, region);
-                    break;
-
-                case 2: //Добавить игрока
-                    f_add_user(player, region);
-                    break;
-
-                case 3: //Удалить регион
-                    f_delete(player, region);
-                    break;
-
-                case 4:
-                    f_control_list(player);
-                    break;
-            }
-
-        });
+        form.send(player);
     }
 
-    public void f_edit_flag(Player player, Region region) {
-        if (!region.isExist()) {
+    public void sendEditionFlagsForm(Player player, Region region) {
+        if (region.isClosed()) {
             player.sendMessage("§cРегион не найден!");
             return;
         }
 
         CustomForm form = new CustomForm("Управление флагами")
-                .addLabel("Установите нужные параметры установки флагов для региона §b" + region.getId() + "§f.");
+                .addElement("Установите нужные параметры установки флагов для региона §b" + region.getName() + "§f.");
 
         for (Flag flag : main.getFlags().values()) {
-            form.addToggle(flag.getName(), region.getFlag(flag));
+            form.addElement(flag.getId(), new Toggle(flag.getName(), region.getFlag(flag)));
         }
 
-        form.send(player, (targetPlayer, targetForm, data) -> {
-            if (data == null) return;
-
-            data.remove(0);
-
-            List<Flag> flags = new ArrayList<>(main.getFlags().values());
-
-            for (int i = 0; i < data.size(); i++) {
-                region.setFlag(flags.get(i), (boolean) data.get(i));
+        form.setHandler((p, response) -> {
+            for(Flag flag: main.getFlags().values()){
+                region.setFlag(flag, response.getToggle(flag.getId()).getValue());
             }
 
             player.sendMessage("§e§lФлаги были успешно изменены!");
-            region.save();
-        });
+            region.save(true);
+        }).send(player);
     }
 
-    public void f_delete(Player player, Region region) {
-        if (!region.isExist()) {
+    public void sendDeleteRegionForm(Player player, Region region) {
+        if (region.isClosed()) {
             player.sendMessage("§cРегион не найден!");
             return;
         }
 
-        SimpleForm form = new SimpleForm("Удаление региона " + region.getId(), "Подтвердите что вы точно хотите удалить регион §b" + region.getId() + "§f");
-
-        form.addButton("Удалить регион", ImageType.PATH, "textures/blocks/barrier")
-                .addButton("Назад");
-
-        form.send(player, (targetPlayer, targetForm, data) -> {
-            if (data == -1) return;
-
-            if (data == 0) {
-                player.sendMessage("§e§lРегион §6" + region.getId() + "§e был успешно удален!");
-                region.remove();
-            } else f_edit_menu(player, region);
-        });
-
+        new ModalForm("Удаление региона")
+                .setContent("Подтвердите что вы точно хотите удалить регион §b" + region.getName() + "§f(id: §7" + region.getId() + "§f)")
+                .setPositiveButton("§l§4Удалить регион")
+                .setNegativeButton("Назад")
+                .setHandler((p, data) -> {
+                    if (data) {
+                        player.sendMessage("§e§lРегион §6" + region.getName() + "§e был успешно удален!");
+                        region.remove();
+                    } else sendEditRegionMenuForm(player, region);
+                }).send(player);
     }
 
-    public void f_add_user(Player player, Region region) {
-        if (!region.isExist()) {
+    public void sendAddUserForm(Player player, Region region) {
+        if (region.isClosed()) {
             player.sendMessage("§cРегион не найден!");
             return;
         }
 
-        CustomForm form = new CustomForm("Добавить игрока");
+        CustomForm form = new CustomForm("Добавить игрока")
+                .addElement("Добавлять можно только игроков, которые стоят рядом с вами.");
 
-        List<String> players = new ArrayList<>();
-
-        for (Player p : Server.getInstance().getOnlinePlayers().values()) {
-            if (!region.getRole(p.getName()).equals(Role.Nobody)) players.remove(player.getName());
-            else players.add(p.getName());
+        List<SelectableElement> players = new ArrayList<>();
+        for (Player p: player.getLevel().getPlayers().values()) {
+            if (p.distanceSquared(player) > 50 || !region.getRole(p.getName()).equals(Role.Nobody)) continue;
+            players.add(new SelectableElement(p.getName(), p));
         }
 
         if (players.size() == 0) {
-            form.addLabel("На сервере сейчас нет игроков, которые не состоят в регионе.");
-            form.send(player);
+            form.addElement("§с§lРядом с вами нет игроков, которых можно добавить в регион.").send(player);
             return;
         }
 
-        form.addLabel("Выберите игрока, которого хотите добавить в ваш регион. После добавления игроку устанавливается роль §bГость§f.")
-                .addDropDown("Список игроков", players);
+        form.addElement("Выберите игрока, которого хотите добавить в ваш регион. После добавления игроку устанавливается роль §bГость§f.")
+                .addElement("target", new Dropdown("Список игроков", players))
+                .setHandler((p, response) -> {
+                    Player target = response.getDropdown("target").getValue().getValue(Player.class);
 
-        form.send(player, (targetPlayer, targetForm, data) -> {
-            if (data == null) return;
+                    region.setRole(target, Role.Guest);
 
-            String p = data.get(1).toString();
-
-            region.setRole(p, Role.Guest);
-
-            player.sendMessage("§e§lИгрок §6" + p + "§e был успешно добавлен в регион §6" + region.getId() + "§e!");
-            if (Server.getInstance().getPlayer(p) != null)
-                Server.getInstance().getPlayer(p).sendMessage("§e§lИгрок §6" + player.getName() + "§e добавил вас в регион §6" + region.getId() + "§e.");
-            region.save();
-        });
+                    p.sendMessage("§e§lИгрок §6" + target.getName() + "§e был успешно добавлен в регион §6" + region.getName() + "§e!");
+                    if (target.isOnline())
+                        target.sendMessage("§e§lИгрок §6" + p.getName() + "§e добавил вас в регион §6" + region.getName() + "§e.");
+                    region.save(true);
+                }).send(player);
     }
 
-    public void f_edit_players(Player player, Region region) {
-        if (!region.isExist()) {
+    public void sendEditPlayersForm(Player player, Region region) {
+        if (region.isClosed()) {
             player.sendMessage("§cРегион не найден!");
             return;
         }
@@ -397,7 +292,7 @@ public class Forms {
         SimpleForm form = new SimpleForm("Управление игроками");
 
         form.setContent(
-                "Выберите нужного игрока для редактирования роли в регионе §e" + region.getId() + "§f.\n" +
+                "Выберите нужного игрока для редактирования роли в регионе §e" + region.getName() + "§f.\n" +
                         "\n" +
                         "Типы игроков:\n" +
                         "§bЗеленые§f - Жители региона.\n" +
@@ -405,90 +300,59 @@ public class Forms {
         );
 
         for (String member : region.getMembers()) {
-            form.addButton(member, ImageType.PATH, "textures/blocks/concrete_lime");
+            form.addButton(member, ImageType.PATH, "textures/blocks/concrete_lime", (p, b) -> sendEditRoleForm(p, member, region));
         }
 
         for (String guest : region.getGuests()) {
-            form.addButton(guest, ImageType.PATH, "textures/blocks/concrete_light_blue");
+            form.addButton(guest, ImageType.PATH, "textures/blocks/concrete_light_blue", (p, b) -> sendEditRoleForm(p, guest, region));
         }
 
-        form.addButton("Назад");
-
-        form.send(player, (targetPlayer, targetForm, data) -> {
-            if (data == -1) return;
-
-            List<String> users = new ArrayList<>(region.getMembers());
-            users.addAll(region.getGuests());
-
-            if (users.size() == data) {
-                f_edit_menu(player, region);
-                return;
-            }
-
-            f_edit_role(player, users.get(data), region);
-        });
+        form.addButton("Назад", (p, b) -> sendEditRegionMenuForm(player, region))
+                .send(player);
 
     }
 
-    public void f_edit_role(Player player, String p, Region region) {
-        if (!region.isExist()) {
+    public void sendEditRoleForm(Player player, String target, Region region) {
+        if (region.isClosed()) {
             player.sendMessage("§cРегион не найден!");
             return;
         }
 
         CustomForm form = new CustomForm("Изменение роли");
 
-        List<String> actions = new ArrayList<>();
-        actions.add("Выгнать из региона");
-        actions.add("Назначить роль 'Гость'");
-        actions.add("Назначить роль 'Житель'");
-        actions.add("Передать регион");
+        List<SelectableElement> actions = new ArrayList<>();
+        actions.add(new SelectableElement("Выгнать из региона", Role.Nobody));
+        actions.add(new SelectableElement("Назначить роль 'Гость'", Role.Guest));
+        actions.add(new SelectableElement("Назначить роль 'Житель'", Role.Member));
+        actions.add(new SelectableElement("Передать регион", Role.Owner));
 
-        form.addLabel("Выберите действие для игрока §b" + p + "§f в регионе §b" + region.getId() + "§f.")
-                .addDropDown("Действие", actions);
+        form.addElement("Выберите действие для игрока §b" + target + "§f в регионе §b" + region.getName() + "§f.")
+                .addElement("action", new Dropdown("Действие", actions))
+                .setHandler((p, response) -> {
+                    Role role = response.getDropdown("action").getValue().getValue(Role.class);
+                    switch (role) {
+                        case Owner:
+                            player.sendMessage("§e§lВы успешно передали регион §6" + region.getName() + "§e игроку §6" + target + "§e.");
+                            if (Server.getInstance().getPlayer(target) != null)
+                                Server.getInstance().getPlayer(target).sendMessage("§e§lИгрок §6" + player.getName() + "§6 передал вам регион §6" + region.getName() + "§e.");
+                            break;
 
-        form.send(player, (targetPlayer, targetForm, data) -> {
-            if (data == null) return;
+                        case Guest:
+                        case Member:
+                            player.sendMessage("§e§lВы успешно выдали роль§6 "+role.getName()+"§e игроку §6" + target + "§e в регионе §6" + region.getName() + "§e.");
+                            if (Server.getInstance().getPlayer(target) != null)
+                                Server.getInstance().getPlayer(target).sendMessage("§e§lИгрок §6" + player.getName() + "§6 установил вам роль§6 "+role.getName()+"§e в регионе §6" + region.getName() + "§e.");
+                            break;
 
-            String action = data.get(1).toString();
-            Role role;
+                        default:
+                            player.sendMessage("§e§lВы успешно выгнали игрока §6" + target + "§e из региона §6" + region.getName() + "§e.");
+                            if (Server.getInstance().getPlayer(target) != null)
+                                Server.getInstance().getPlayer(target).sendMessage("§e§lИгрок §6" + player.getName() + "§6 выгнал вас из региона §6" + region.getName() + "§e.");
+                    }
 
-            switch (actions.indexOf(action)) {
-                case 3:
-                    role = Role.Owner;
-
-                    player.sendMessage("§e§lВы успешно передали регион §6" + region.getId() + "§e игроку §6" + p + "§e.");
-                    if (Server.getInstance().getPlayer(p) != null)
-                        Server.getInstance().getPlayer(p).sendMessage("§e§lИгрок §6" + player.getName() + "§6 передал вам регион §6" + region.getId() + "§e.");
-                    break;
-
-                case 2:
-                    role = Role.Member;
-
-                    player.sendMessage("§e§lВы успешно выдали роль§6 Житель§e игроку §6" + p + "§e в регионе §6" + region.getId() + "§e.");
-                    if (Server.getInstance().getPlayer(p) != null)
-                        Server.getInstance().getPlayer(p).sendMessage("§e§lИгрок §6" + player.getName() + "§6 установил вам роль§6 Житель§e в регионе §6" + region.getId() + "§e.");
-                    break;
-
-                case 1:
-                    role = Role.Guest;
-
-                    player.sendMessage("§e§lВы успешно выдали роль§6 Гость§e игроку §6" + p + "§e в регионе §6" + region.getId() + "§e.");
-                    if (Server.getInstance().getPlayer(p) != null)
-                        Server.getInstance().getPlayer(p).sendMessage("§e§lИгрок §6" + player.getName() + "§6 установил вам роль§6 Гость§e в регионе §§6" + region.getId() + "§e.");
-                    break;
-
-                default:
-                    role = Role.Nobody;
-
-                    player.sendMessage("§e§lВы успешно выгнали игрока §6" + p + "§e из региона §6" + region.getId() + "§e.");
-                    if (Server.getInstance().getPlayer(p) != null)
-                        Server.getInstance().getPlayer(p).sendMessage("§e§lИгрок §6" + player.getName() + "§6 выгнал вас из региона §6" + region.getId() + "§e.");
-            }
-
-            region.setRole(p, role);
-            region.save();
-        });
+                    region.setRole(target, role);
+                    region.save(true);
+                }).send(player);
     }
 
 }

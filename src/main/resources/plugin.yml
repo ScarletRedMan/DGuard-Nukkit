@@ -1,9 +1,25 @@
 name: DGuard
 author: qPexLegendary
-version: 3.0.0
+version: 4.0.1
 api: 1.0.8
 main: ru.dragonestia.dguard.DGuard
 load: STARTUP
 depend:
-  - FormAPI
-  - IronLib
+  - FormConstructor
+
+permissions:
+  dguard:
+    default: false
+    children:
+      use:
+        default: true
+        description: "Использование команды /rg"
+      admin:
+        default: op
+        description: "Доступ ко всем регионам"
+      size:
+        default: op
+        description: "Неограниченные размены регионов"
+      count:
+        default: op
+        description: "Неограниченное количество владеемых регионов"

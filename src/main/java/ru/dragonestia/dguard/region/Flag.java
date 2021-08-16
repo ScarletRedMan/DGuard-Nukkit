@@ -1,7 +1,8 @@
-package ru.dragonestia.dguard.elements;
+package ru.dragonestia.dguard.region;
 
-import cn.nukkit.nbt.tag.CompoundTag;
+import lombok.EqualsAndHashCode;
 
+@EqualsAndHashCode
 public class Flag {
 
     private final String id, name, description;
@@ -32,10 +33,9 @@ public class Flag {
     }
 
     public boolean getValue(Region region){
-        if(!region.isExist()) return true;
-        CompoundTag flags = region.getFlags();
+        if(region.isClosed()) return true;
 
-        return flags.exist(id)? flags.getBoolean(id) : defaultValue;
+        return region.getFlags().getOrDefault(id, defaultValue);
     }
 
 }

@@ -1,10 +1,10 @@
-package ru.dragonestia.dguard.elements;
+package ru.dragonestia.dguard.region;
 
 public enum Role {
 
     Nobody(0, "Никто"),
     Guest(1, "Гость"),
-    Member(2, "Пользователь"),
+    Member(2, "Житель"),
     Owner(3, "Владелец");
 
     private final int id;

@@ -16,9 +16,12 @@ import cn.nukkit.event.player.PlayerInteractEvent;
 import cn.nukkit.math.Vector3;
 import ru.dragonestia.dguard.DGuard;
 import ru.dragonestia.dguard.custom.CustomMethods;
-import ru.dragonestia.dguard.elements.Point;
-import ru.dragonestia.dguard.elements.Region;
-import ru.dragonestia.dguard.elements.Role;
+import ru.dragonestia.dguard.region.Region;
+import ru.dragonestia.dguard.region.Role;
+import ru.dragonestia.dguard.util.Point;
+
+import java.util.Arrays;
+import java.util.HashSet;
 
 public class BlockListener implements Listener {
 
@@ -26,27 +29,27 @@ public class BlockListener implements Listener {
 
     private final CustomMethods customMethods;
 
-    private final int[] blockedItems, doors, chests, furnaces, redstone, other;
+    private final HashSet<Integer> blockedItems, doors, chests, furnaces, redstone, other;
 
     public BlockListener(DGuard main){
         this.main = main;
         customMethods = main.getCustomMethods();
 
-        blockedItems = new int[]{259, 325, 269, 273, 256, 284, 277, 290, 291, 292, 294, 293};
-        doors = new int[]{64, 193, 194, 195, 196, 197, 404, 401, 403, 402, 400, 96, 107, 183, 184, 185, 187, 186};
-        chests = new int[]{458, 205, 54, 146};
-        furnaces = new int[]{453, 451, 61};
-        redstone = new int[]{77, 143, 399, 396, 398, 395, 397, 69};
-        other = new int[]{138, 449, 117, 125, 23, 468, 154, 84, 83, 149};
+        blockedItems = new HashSet<>(Arrays.asList(259, 325, 269, 273, 256, 284, 277, 290, 291, 292, 294, 293));
+        doors = new HashSet<>(Arrays.asList(64, 193, 194, 195, 196, 197, 404, 401, 403, 402, 400, 96, 107, 183, 184, 185, 187, 186));
+        chests = new HashSet<>(Arrays.asList(458, 205, 54, 146));
+        furnaces = new HashSet<>(Arrays.asList(453, 451, 61));
+        redstone = new HashSet<>(Arrays.asList(77, 143, 399, 396, 398, 395, 397, 69));
+        other = new HashSet<>(Arrays.asList(138, 449, 117, 125, 23, 468, 154, 84, 83, 149));
     }
 
     private boolean checkBuild(Event event, Player player, Vector3 pos){
         if(event.isCancelled()) return true;
 
-        Region region = new Point((int) pos.x, (int) pos.z, player.getLevel()).getRegion();
+        Region region = new Point(pos).getRegion(player.getLevel());
 
         if (region == null) {
-            if (main.isCanBuildOutRegion()) return false;
+            if (main.getSettings().isCanBuildOutRegion()) return false;
 
             player.sendTip("§cЧтобы строить здесь вам нужно создать регион");
             return true;
@@ -64,17 +67,15 @@ public class BlockListener implements Listener {
         return false;
     }
 
-    private boolean checkTap(PlayerInteractEvent event, Region region, int[] securedId, String flagName){
+    private boolean checkTap(PlayerInteractEvent event, Region region, HashSet<Integer> securedId, String flagName){
         if(event.isCancelled()) return true;
         Player player = event.getPlayer();
 
-        for(int id: securedId){
-            if(id == event.getBlock().getId()){
-                if(region.getRole(player.getName()).equals(Role.Nobody) && !region.getFlag(main.getFlags().get(flagName)) && !customMethods.canDoAllCondition.check(player)){
-                    player.sendTip("§cУ вас не доступа к данному региону");
-                    return true;
-                }else break;
-            }
+        if(securedId.contains(event.getBlock().getId())){
+            if(region.getRole(player.getName()).equals(Role.Nobody) && !region.getFlag(main.getFlags().get(flagName)) && !customMethods.canDoAllCondition.check(player)){
+                player.sendTip("§cУ вас не доступа к данному региону");
+                return true;
+            } else return false;
         }
         return false;
     }
@@ -102,8 +103,8 @@ public class BlockListener implements Listener {
     @EventHandler(priority = EventPriority.HIGH)
     public void onBedEnter(PlayerBedEnterEvent event) {
         Player player = event.getPlayer();
-        Point point = new Point((int) event.getBed().x, (int) event.getBed().z, player.getLevel());
-        Region region = point.getRegion();
+        Point point = new Point(event.getBed());
+        Region region = point.getRegion(player.getLevel());
 
         if (region == null) return;
 
@@ -128,30 +129,26 @@ public class BlockListener implements Listener {
         if(!event.getAction().equals(PlayerInteractEvent.Action.RIGHT_CLICK_BLOCK)) return;
 
         Player player = event.getPlayer();
-        Point point = new Point((int)event.getBlock().x, (int)event.getBlock().z, player.getLevel());
-        Region region = point.getRegion();
+        Point point = new Point(event.getBlock());
+        Region region = point.getRegion(player.getLevel());
 
         if(region == null){
             return;
         }
 
-        for(int id: blockedItems){
-            if(id == player.getInventory().getItemInHand().getId()){
-                if(region.getRole(player.getName()).getId() < Role.Member.getId() && !customMethods.canDoAllCondition.check(player)){
-                    player.sendTip("§cУ вас не доступа к данному региону");
-                    event.setCancelled(true);
-                    return;
-                }else break;
+        if(blockedItems.contains(player.getInventory().getItemInHand().getId())){
+            if(region.getRole(player.getName()).getId() < Role.Member.getId() && !customMethods.canDoAllCondition.check(player)){
+                player.sendTip("§cУ вас не доступа к данному региону");
+                event.setCancelled(true);
+                return;
             }
         }
 
-        for(int id: doors){
-            if(id == event.getBlock().getId()){
-                if(region.getRole(player.getName()).equals(Role.Nobody) && !region.getFlag(main.getFlags().get("doors")) && !customMethods.canDoAllCondition.check(player)){
-                    player.sendTip("§cУ вас не доступа к данному региону");
-                    event.setCancelled(true);
-                    return;
-                }else break;
+        if(doors.contains(event.getBlock().getId())){
+            if(region.getRole(player.getName()).equals(Role.Nobody) && !region.getFlag(main.getFlags().get("doors")) && !customMethods.canDoAllCondition.check(player)){
+                player.sendTip("§cУ вас не доступа к данному региону");
+                event.setCancelled(true);
+                return;
             }
         }
 

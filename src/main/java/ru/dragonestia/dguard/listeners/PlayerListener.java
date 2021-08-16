@@ -7,10 +7,11 @@ import cn.nukkit.event.Listener;
 import cn.nukkit.event.entity.EntityDamageByEntityEvent;
 import cn.nukkit.event.entity.EntityDamageEvent;
 import cn.nukkit.event.player.PlayerInteractEvent;
+import cn.nukkit.event.player.PlayerQuitEvent;
 import cn.nukkit.item.Item;
 import ru.dragonestia.dguard.DGuard;
-import ru.dragonestia.dguard.elements.Point;
-import ru.dragonestia.dguard.elements.Region;
+import ru.dragonestia.dguard.region.Region;
+import ru.dragonestia.dguard.util.Point;
 
 public class PlayerListener implements Listener {
 
@@ -30,12 +31,12 @@ public class PlayerListener implements Listener {
             damager = (Player) ((EntityDamageByEntityEvent) event).getDamager();
 
             Point to, from;
-            to = new Point((int) player.x, (int) player.z, player.level);
-            from = new Point((int) damager.x, (int) damager.z, damager.level);
+            to = new Point(player);
+            from = new Point(damager);
 
             Region region;
 
-            region = to.getRegion();
+            region = to.getRegion(player.getLevel());
             if(region != null){
                 if(!region.getFlag(main.getFlags().get("pvp"))){
                     damager.sendTip("§cВ данном месте PvP отключено");
@@ -43,7 +44,7 @@ public class PlayerListener implements Listener {
                 }
             }
 
-            region = from.getRegion();
+            region = from.getRegion(player.getLevel());
             if(region != null){
                 if(!region.getFlag(main.getFlags().get("pvp"))){
                     damager.sendTip("§cВ данном месте PvP отключено");
@@ -62,14 +63,23 @@ public class PlayerListener implements Listener {
         if(player.getInventory().getItemInHand().getId() != Item.STICK || player.isSneaking()) return;
         event.setCancelled(true);
 
-        Point point = new Point((int) event.getBlock().x, (int) event.getBlock().z, player.getLevel());
-        Region region = point.getRegion();
+        Point point = new Point(player);
+        Region region = point.getRegion(player.getLevel());
 
         if(region == null){
             player.sendTip("§6Здесь нет регионов");
         }else{
             player.sendTip("§aЗдесь есть регион");
         }
+    }
+
+
+    @EventHandler
+    void onQuit(PlayerQuitEvent event){
+        Player player = event.getPlayer();
+
+        main.getFirstPoints().remove(player.getId());
+        main.getSecondPoints().remove(player.getId());
     }
 
 }
