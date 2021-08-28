@@ -1,5 +1,6 @@
 package ru.dragonestia.dguard.util;
 
+import cn.nukkit.Player;
 import cn.nukkit.level.Level;
 import cn.nukkit.math.Vector3;
 import com.google.gson.annotations.SerializedName;
@@ -30,6 +31,24 @@ public class Point {
             if(region.getArea().isInside(this)) return region;
         }
         return null;
+    }
+
+    public Region getCacheRegion(Player player){
+        Region region;
+        long playerId = player.getId();
+
+        if(DGuard.cachedRegion.containsKey(playerId)){
+            region = DGuard.cachedRegion.get(playerId);
+            if(!region.isClosed() && region.getArea().isInside(this)){
+                return region;
+            }
+        }
+
+        region = getRegion(player.getLevel());
+        if(region == null) DGuard.cachedRegion.remove(playerId);
+        else DGuard.cachedRegion.put(playerId, region);
+
+        return region;
     }
 
     public static Point min(Point p1, Point p2){

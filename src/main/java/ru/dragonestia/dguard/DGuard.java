@@ -25,6 +25,7 @@ public class DGuard extends PluginBase {
     @Getter private static DGuard instance;
 
     public static final HashMap<String, HashMap<Integer, Region>> regions = new HashMap<>();
+    public static final HashMap<Long, Region> cachedRegion = new HashMap<>();
     private final HashMap<String, Flag> flags = new HashMap<>();
     @Getter private Settings settings;
     @Getter private CustomMethods customMethods;

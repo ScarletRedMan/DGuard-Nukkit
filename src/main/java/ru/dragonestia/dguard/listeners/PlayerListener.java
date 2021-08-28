@@ -36,7 +36,7 @@ public class PlayerListener implements Listener {
 
             Region region;
 
-            region = to.getRegion(player.getLevel());
+            region = to.getCacheRegion(player);
             if(region != null){
                 if(!region.getFlag(main.getFlags().get("pvp"))){
                     damager.sendTip("§cВ данном месте PvP отключено");
@@ -64,7 +64,7 @@ public class PlayerListener implements Listener {
         event.setCancelled(true);
 
         Point point = new Point(player);
-        Region region = point.getRegion(player.getLevel());
+        Region region = point.getCacheRegion(player);
 
         if(region == null){
             player.sendTip("§6Здесь нет регионов");
@@ -80,6 +80,7 @@ public class PlayerListener implements Listener {
 
         main.getFirstPoints().remove(player.getId());
         main.getSecondPoints().remove(player.getId());
+        DGuard.cachedRegion.remove(player.getId());
     }
 
 }

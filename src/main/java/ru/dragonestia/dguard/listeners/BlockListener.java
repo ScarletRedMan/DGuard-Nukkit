@@ -46,7 +46,7 @@ public class BlockListener implements Listener {
     private boolean checkBuild(Event event, Player player, Vector3 pos){
         if(event.isCancelled()) return true;
 
-        Region region = new Point(pos).getRegion(player.getLevel());
+        Region region = new Point(pos).getCacheRegion(player);
 
         if (region == null) {
             if (main.getSettings().isCanBuildOutRegion()) return false;
@@ -104,7 +104,7 @@ public class BlockListener implements Listener {
     public void onBedEnter(PlayerBedEnterEvent event) {
         Player player = event.getPlayer();
         Point point = new Point(event.getBed());
-        Region region = point.getRegion(player.getLevel());
+        Region region = point.getCacheRegion(player);
 
         if (region == null) return;
 
@@ -130,7 +130,7 @@ public class BlockListener implements Listener {
 
         Player player = event.getPlayer();
         Point point = new Point(event.getBlock());
-        Region region = point.getRegion(player.getLevel());
+        Region region = point.getCacheRegion(player);
 
         if(region == null){
             return;
