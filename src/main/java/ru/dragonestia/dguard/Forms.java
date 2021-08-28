@@ -70,7 +70,7 @@ public class Forms {
             return;
         }
 
-        SimpleForm form = new SimpleForm("Регион " + region.getName());
+        SimpleForm form = new SimpleForm("Регион §l'" + region.getName() + "'");
 
         String members, guests;
 
@@ -86,7 +86,7 @@ public class Forms {
 
         StringBuilder flags = new StringBuilder();
         for(Flag flag: main.getFlags().values()){
-            flags.append(" §2").append(flag.getName()).append("§f - ").append(flag.getValue(region) ? "§aДа" : "§cНет").append("§f\n");
+            flags.append(" ").append(flag.getValue(region) ? "\uE0A0" : "\uE0A1").append(" ").append(flag.getName()).append("§f").append("§f\n\n");
         }
 
         Area area = region.getArea();
@@ -96,8 +96,12 @@ public class Forms {
                         " §fЖители региона: " + members + "§f.\n" +
                         " §fГости: " + guests + "§f.\n" +
                         " §fПлощадь региона: §b" + area.getSpace(main.getSettings().is_3d()) + "§f(§e" + area.deltaX() + (main.getSettings().is_3d()? ("§6x§e" + area.deltaY()) : "") + "§6x§e" + area.deltaZ() + ")\n" +
-                        "\n§l§fФлаги:§r\n" + flags
+                        "\n§l§fФлаги:§r\n\n" + flags
         );
+
+        if(region.getRole(player.getName()).equals(Role.Owner)){
+            form.addButton("Управление регионом", ImageType.PATH, "textures/ui/gear", (p, b) -> sendEditRegionMenuForm(p, region));
+        }
 
         form.send(player);
 
@@ -196,7 +200,7 @@ public class Forms {
             return;
         }
 
-        SimpleForm form = new SimpleForm("Управление регионом " + region.getName());
+        SimpleForm form = new SimpleForm("Управление регионом §l'" + region.getName() + "'");
 
         form.setContent("Выберите нужное вам действие, которое хотите применить к данному региону.")
                 .addButton("Флаги региона", ImageType.PATH, "textures/items/repeater", (p, b) -> sendEditionFlagsForm(player, region))
