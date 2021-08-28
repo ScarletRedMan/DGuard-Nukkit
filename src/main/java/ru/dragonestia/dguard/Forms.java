@@ -222,6 +222,7 @@ public class Forms {
                 .addElement("Установите нужные параметры установки флагов для региона §b" + region.getName() + "§f.");
 
         for (Flag flag : main.getFlags().values()) {
+            form.addElement(flag.getDescription());
             form.addElement(flag.getId(), new Toggle(flag.getName(), region.getFlag(flag)));
         }
 
