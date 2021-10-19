@@ -96,7 +96,7 @@ public class Region {
 
     public synchronized void remove(){
         closed = true;
-        DGuard.regions.remove(levelName).remove(id);
+        DGuard.regions.get(levelName).remove(id);
         main.getServer().getScheduler().scheduleAsyncTask(main, new RegionRemoveTask(this, main));
     }
 
