@@ -1,5 +1,5 @@
 [![License: MIT](https://img.shields.io/badge/license-MIT-blue.svg)](LICENSE)
-[![Version](https://img.shields.io/badge/version-2.1-brightgreen)](https://github.com/qPexLegendary/DGuard-Nukkit/releases/tag/2.1)
+[![Version](https://img.shields.io/badge/version-2.2-brightgreen)](https://github.com/qPexLegendary/DGuard-Nukkit/releases/tag/2.2)
 
 DGuard
 ------------- 
