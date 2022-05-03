@@ -73,7 +73,7 @@ public class BlockListener implements Listener {
 
         if(securedId.contains(event.getBlock().getId())){
             if(region.getRole(player.getName()).equals(Role.Nobody) && !region.getFlag(main.getFlags().get(flagName)) && !customMethods.canDoAllCondition.check(player)){
-                player.sendTip("§cУ вас не доступа к данному региону");
+                player.sendTip("§cУ вас нет доступа к данному региону");
                 return true;
             } else return false;
         }
@@ -138,7 +138,7 @@ public class BlockListener implements Listener {
 
         if(blockedItems.contains(player.getInventory().getItemInHand().getId())){
             if(region.getRole(player.getName()).getId() < Role.Member.getId() && !customMethods.canDoAllCondition.check(player)){
-                player.sendTip("§cУ вас не доступа к данному региону");
+                player.sendTip("§cУ вас нет доступа к данному региону");
                 event.setCancelled(true);
                 return;
             }
@@ -146,7 +146,7 @@ public class BlockListener implements Listener {
 
         if(doors.contains(event.getBlock().getId())){
             if(region.getRole(player.getName()).equals(Role.Nobody) && !region.getFlag(main.getFlags().get("doors")) && !customMethods.canDoAllCondition.check(player)){
-                player.sendTip("§cУ вас не доступа к данному региону");
+                player.sendTip("§cУ вас нет доступа к данному региону");
                 event.setCancelled(true);
                 return;
             }
