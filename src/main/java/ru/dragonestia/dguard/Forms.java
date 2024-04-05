@@ -29,19 +29,19 @@ public class Forms {
         Region region = new Point(player).getRegion(player.getLevel());
 
         SimpleForm form = new SimpleForm("Меню")
-                .addButton("Управление регионами", ImageType.PATH, "textures/items/book_writable", (p, b) -> sendOwnRegionsForm(player))
-                .addButton("Создать регион", ImageType.PATH, "textures/items/campfire", (p, b) -> sendPreCreateForm(player))
-                .addButton("Мои регионы", ImageType.PATH, "textures/items/book_normal", (p, b) -> sendRegionsListForm(player));
+                .add(new Button("Управление регионами", Button.Icon.texture("textures/items/book_writable"), (p, b) -> sendOwnRegionsForm(player)))
+                .add(new Button("Создать регион", Button.Icon.texture("textures/items/campfire"), (p, b) -> sendPreCreateForm(player)))
+                .add(new Button("Мои регионы", Button.Icon.texture("textures/items/book_normal"), (p, b) -> sendRegionsListForm(player)));
 
         if(region != null){
-             form.addButton("Информация о текущем регионе", ImageType.PATH, "textures/items/map_empty", (p, b) -> sendRegionInfoForm(player, region));
+             form.add(new Button("Информация о текущем регионе", Button.Icon.texture("textures/items/map_empty"), (p, b) -> sendRegionInfoForm(player, region)));
 
              if(region.getOwner().equalsIgnoreCase(player.getName())){
-                 form.addButton("Управление текущим регионом", ImageType.PATH, "textures/gui/newgui/Realms", (p, b) -> sendEditRegionMenuForm(p, region));
+                 form.add(new Button("Управление текущим регионом", Button.Icon.texture("textures/gui/newgui/Realms"), (p, b) -> sendEditRegionMenuForm(p, region)));
              }
         }
 
-        form.addButton("Гайд", ImageType.PATH, "textures/items/book_portfolio", (p, b) -> sendGuideForm(player))
+        form.add(new Button("Гайд", Button.Icon.texture("textures/items/book_portfolio"), (p, b) -> sendGuideForm(player)))
                 .send(player);
     }
 
@@ -60,7 +60,7 @@ public class Forms {
                         " - §bГость§f - Может только взаимодействовать с печками, сундуками и дверьми. Хорошо подойдет для приюченных игроков.\n" +
                         " - §bЖитель§f - Может строить в привате, также взаимодействовать с сундуками, печками и дверями. Добавлять только на свой страх и риск, ведь администрация не несет ответственности за разрушенный дом.\n" +
                         " - §bВладелец§f - Полностью управляет регионом, выдает роли другим игрокам в регионе.")
-                .addButton("Назад", (p, b) -> sendMainForm(player))
+                .add(new Button("Назад", (p, b) -> sendMainForm(player)))
                 .send(player);
     }
 
@@ -74,12 +74,12 @@ public class Forms {
 
         String members, guests;
 
-        if (region.getMembers().size() == 0) members = "§eОтсутствуют§f";
+        if (region.getMembers().isEmpty()) members = "§eОтсутствуют§f";
         else {
             members = "§3" + String.join(" ", region.getMembers()) + "§f";
         }
 
-        if (region.getGuests().size() == 0) guests = "§eОтсутствуют§f";
+        if (region.getGuests().isEmpty()) guests = "§eОтсутствуют§f";
         else {
             guests = "§3" + String.join(" ", region.getGuests()) + "§f";
         }
@@ -100,7 +100,7 @@ public class Forms {
         );
 
         if(region.getRole(player.getName()).equals(Role.Owner)){
-            form.addButton("Управление регионом", ImageType.PATH, "textures/ui/gear", (p, b) -> sendEditRegionMenuForm(p, region));
+            form.add(new Button("Управление регионом", Button.Icon.texture("textures/ui/gear"), (p, b) -> sendEditRegionMenuForm(p, region)));
         }
 
         form.send(player);
@@ -114,7 +114,7 @@ public class Forms {
 
         if (regions.size() == 0) {
             form.setContent("У вас еще нет регионов.")
-                    .addButton("Назад", (p, b) -> sendMainForm(player))
+                    .add(new Button("Назад", (p, b) -> sendMainForm(player)))
                     .send(player);
 
             return;
@@ -123,10 +123,10 @@ public class Forms {
         form.setContent("Выберите регион, который информацию которого вы хотите посмотреть.");
 
         for (Region region: regions) {
-            form.addButton("§l" + region.getName() + "\n§r§8(id: "+region.getId()+")", ImageType.PATH, "textures/items/campfire", (p, b) -> sendRegionInfoForm(player, region));
+            form.add(new Button("§l" + region.getName() + "\n§r§8(id: "+region.getId()+")", Button.Icon.texture("textures/items/campfire"), (p, b) -> sendRegionInfoForm(player, region)));
 
         }
-        form.addButton("Назад", (p, b) -> sendMainForm(player))
+        form.add(new Button("Назад", (p, b) -> sendMainForm(player)))
                 .send(player);
     }
 
@@ -138,15 +138,15 @@ public class Forms {
                                 "Просто выделяйте крайние точки с помощью команд §b/rg pos1§f и §b/rg pos2§f.\n" +
                                 (main.getSettings().is_3d()? "" : "\nПримечание: §3Регион создается во всю высоту, а блоки расчитываются по площади территории.§f")
                 )
-                .addButton("Создать регион", ImageType.PATH, "textures/items/campfire", (p, b) -> sendCreateRegionForm(player))
-                .addButton("Назад", (p, b) -> sendMainForm(player))
+                .add(new Button("Создать регион", Button.Icon.texture("textures/items/campfire"), (p, b) -> sendCreateRegionForm(player)))
+                .add(new Button("Назад", (p, b) -> sendMainForm(player)))
                 .send(player);
     }
 
     public void sendCreateRegionForm(Player player) {
         new CustomForm("Создание региона")
-                .addElement("Укажите желаемое название региона. Допустимы абсолютно любые символы.")
-                .addElement("rg-name", new Input("Название региона", "Название региона. Например: " + player.getName()))
+                .add("Укажите желаемое название региона. Допустимы абсолютно любые символы.")
+                .add("rg-name", new Input("Название региона", "Название региона. Например: " + player.getName()))
                 .setHandler((p, response) -> {
                     String regionName = response.getInput("rg-name").getValue().trim().replace('.', '-');
 
@@ -177,9 +177,9 @@ public class Forms {
 
         List<Region> regions = new PlayerRegionManager(player, main).getRegions();
 
-        if (regions.size() == 0) {
+        if (regions.isEmpty()) {
             form.setContent("У вас еще нет регионов.")
-                    .addButton("Назад", (p, b) -> sendMainForm(player))
+                    .add(new Button("Назад", (p, b) -> sendMainForm(player)))
                     .send(player);
             return;
         }
@@ -187,10 +187,10 @@ public class Forms {
         form.setContent("Выберите регион, который хотите редактировать.");
 
         for (Region region : regions) {
-            form.addButton("§r" + region.getName() + "\n§r§8(id: "+region.getId()+")", ImageType.PATH, "textures/items/campfire", (p, b) -> sendEditRegionMenuForm(player, region));
+            form.add(new Button("§r" + region.getName() + "\n§r§8(id: "+region.getId()+")", Button.Icon.texture("textures/items/campfire"), (p, b) -> sendEditRegionMenuForm(player, region)));
         }
 
-        form.addButton("Назад", (p, b) -> sendMainForm(player))
+        form.add(new Button("Назад", (p, b) -> sendMainForm(player)))
                 .send(player);
     }
 
@@ -203,11 +203,11 @@ public class Forms {
         SimpleForm form = new SimpleForm("Управление регионом §l'" + region.getName() + "'");
 
         form.setContent("Выберите нужное вам действие, которое хотите применить к данному региону.")
-                .addButton("Флаги региона", ImageType.PATH, "textures/items/repeater", (p, b) -> sendEditionFlagsForm(player, region))
-                .addButton("Управление игроками", ImageType.PATH, "textures/items/name_tag", (p, b) -> sendEditPlayersForm(player, region))
-                .addButton("Добавить игрока", ImageType.PATH, "textures/items/cake", (p, b) -> sendAddUserForm(player, region))
-                .addButton("Удалить регион", ImageType.PATH, "textures/items/blaze_powder", (p, b) -> sendDeleteRegionForm(player, region))
-                .addButton("Назад", (p, b) -> sendOwnRegionsForm(player));
+                .add(new Button("Флаги региона", Button.Icon.texture("textures/items/repeater"), (p, b) -> sendEditionFlagsForm(player, region)))
+                .add(new Button("Управление игроками", Button.Icon.texture("textures/items/name_tag"), (p, b) -> sendEditPlayersForm(player, region)))
+                .add(new Button("Добавить игрока", Button.Icon.texture("textures/items/cake"), (p, b) -> sendAddUserForm(player, region)))
+                .add(new Button("Удалить регион", Button.Icon.texture("textures/items/blaze_powder"), (p, b) -> sendDeleteRegionForm(player, region)))
+                .add(new Button("Назад", (p, b) -> sendOwnRegionsForm(player)));
 
         form.send(player);
     }
@@ -219,11 +219,11 @@ public class Forms {
         }
 
         CustomForm form = new CustomForm("Управление флагами")
-                .addElement("Установите нужные параметры установки флагов для региона §b" + region.getName() + "§f.");
+                .add("Установите нужные параметры установки флагов для региона §b" + region.getName() + "§f.");
 
         for (Flag flag : main.getFlags().values()) {
-            form.addElement(flag.getDescription());
-            form.addElement(flag.getId(), new Toggle(flag.getName(), region.getFlag(flag)));
+            form.add(flag.getDescription());
+            form.add(flag.getId(), new Toggle(flag.getName(), region.getFlag(flag)));
         }
 
         form.setHandler((p, response) -> {
@@ -261,7 +261,7 @@ public class Forms {
         }
 
         CustomForm form = new CustomForm("Добавить игрока")
-                .addElement("Добавлять можно только игроков, которые стоят рядом с вами.");
+                .add("Добавлять можно только игроков, которые стоят рядом с вами.");
 
         List<SelectableElement> players = new ArrayList<>();
         for (Player p: player.getLevel().getPlayers().values()) {
@@ -270,12 +270,12 @@ public class Forms {
         }
 
         if (players.size() == 0) {
-            form.addElement("§с§lРядом с вами нет игроков, которых можно добавить в регион.").send(player);
+            form.add("§с§lРядом с вами нет игроков, которых можно добавить в регион.").send(player);
             return;
         }
 
-        form.addElement("Выберите игрока, которого хотите добавить в ваш регион. После добавления игроку устанавливается роль §bГость§f.")
-                .addElement("target", new Dropdown("Список игроков", players))
+        form.add("Выберите игрока, которого хотите добавить в ваш регион. После добавления игроку устанавливается роль §bГость§f.")
+                .add("target", new Dropdown("Список игроков", players))
                 .setHandler((p, response) -> {
                     Player target = response.getDropdown("target").getValue().getValue(Player.class);
 
@@ -305,14 +305,14 @@ public class Forms {
         );
 
         for (String member : region.getMembers()) {
-            form.addButton(member, ImageType.PATH, "textures/blocks/concrete_lime", (p, b) -> sendEditRoleForm(p, member, region));
+            form.add(new Button(member, Button.Icon.texture("textures/blocks/concrete_lime"), (p, b) -> sendEditRoleForm(p, member, region)));
         }
 
         for (String guest : region.getGuests()) {
-            form.addButton(guest, ImageType.PATH, "textures/blocks/concrete_light_blue", (p, b) -> sendEditRoleForm(p, guest, region));
+            form.add(new Button(guest, Button.Icon.texture("textures/blocks/concrete_light_blue"), (p, b) -> sendEditRoleForm(p, guest, region)));
         }
 
-        form.addButton("Назад", (p, b) -> sendEditRegionMenuForm(player, region))
+        form.add(new Button("Назад", (p, b) -> sendEditRegionMenuForm(player, region)))
                 .send(player);
 
     }
@@ -331,8 +331,8 @@ public class Forms {
         actions.add(new SelectableElement("Назначить роль 'Житель'", Role.Member));
         actions.add(new SelectableElement("Передать регион", Role.Owner));
 
-        form.addElement("Выберите действие для игрока §b" + target + "§f в регионе §b" + region.getName() + "§f.")
-                .addElement("action", new Dropdown("Действие", actions))
+        form.add("Выберите действие для игрока §b" + target + "§f в регионе §b" + region.getName() + "§f.")
+                .add("action", new Dropdown("Действие", actions))
                 .setHandler((p, response) -> {
                     Role role = response.getDropdown("action").getValue().getValue(Role.class);
                     switch (role) {

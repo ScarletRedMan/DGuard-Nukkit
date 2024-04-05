@@ -3,7 +3,6 @@ package ru.dragonestia.dguard.commands;
 import cn.nukkit.Player;
 import cn.nukkit.command.Command;
 import cn.nukkit.command.CommandSender;
-import cn.nukkit.command.data.CommandParameter;
 import ru.dragonestia.dguard.DGuard;
 import ru.dragonestia.dguard.util.Point;
 
@@ -15,10 +14,6 @@ public class RegionCommand extends Command {
         super("region", "Управление регионами", "/region", new String[]{"rg"});
 
         setPermission("dguard.use");
-
-        addCommandParameters("dguard", new CommandParameter[]{
-                new CommandParameter("Агрумент", new String[]{"pos1", "pos2"})
-        });
 
         this.main = main;
     }
