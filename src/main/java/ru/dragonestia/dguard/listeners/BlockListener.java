@@ -8,7 +8,6 @@ import cn.nukkit.event.Listener;
 import cn.nukkit.event.block.BlockBreakEvent;
 import cn.nukkit.event.block.BlockBurnEvent;
 import cn.nukkit.event.block.BlockPlaceEvent;
-import cn.nukkit.event.block.ItemFrameDropItemEvent;
 import cn.nukkit.event.player.PlayerBedEnterEvent;
 import cn.nukkit.event.player.PlayerBucketEmptyEvent;
 import cn.nukkit.event.player.PlayerBucketFillEvent;
@@ -112,11 +111,6 @@ public class BlockListener implements Listener {
             event.setCancelled(true);
             player.sendTip("§cУ вас нет доступа к данному региону");
         }
-    }
-
-    @EventHandler(priority = EventPriority.HIGH)
-    public void onFrameDropItem(ItemFrameDropItemEvent event){
-        event.setCancelled(checkBuild(event, event.getPlayer(), event.getBlock()));
     }
 
     @EventHandler(priority = EventPriority.HIGH)
