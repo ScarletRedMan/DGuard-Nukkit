@@ -61,6 +61,7 @@ public class DGuard extends PluginBase {
         registerFlag("furnace", "Открытие печек", "Возможность другим игрокам свободно взаимодействовать с печками", false);
         registerFlag("pvp", "Режим PvP", "Возможность драться игрокам с другими игроками", false);
         registerFlag("redstone", "Механизмы", "Возможность использовать механизмы", false);
+        registerFlag("fall-damage", "Отключение урона от падения", "Отключает урон от падения в регионе", false);
 
         loadRegions();
     }

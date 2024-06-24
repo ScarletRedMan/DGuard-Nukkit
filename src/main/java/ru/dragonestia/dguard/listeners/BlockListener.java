@@ -12,12 +12,14 @@ import cn.nukkit.event.player.PlayerBedEnterEvent;
 import cn.nukkit.event.player.PlayerBucketEmptyEvent;
 import cn.nukkit.event.player.PlayerBucketFillEvent;
 import cn.nukkit.event.player.PlayerInteractEvent;
+import cn.nukkit.item.Item;
 import cn.nukkit.math.Vector3;
 import ru.dragonestia.dguard.DGuard;
 import ru.dragonestia.dguard.custom.CustomMethods;
 import ru.dragonestia.dguard.region.Region;
 import ru.dragonestia.dguard.region.Role;
 import ru.dragonestia.dguard.util.Point;
+import cn.nukkit.inventory.ChestInventory;
 
 import java.util.Arrays;
 import java.util.HashSet;
@@ -118,7 +120,7 @@ public class BlockListener implements Listener {
         event.setCancelled(true);
     }
 
-    @EventHandler(priority = EventPriority.HIGH)
+    /* @EventHandler(priority = EventPriority.HIGH)
     public void onTap(PlayerInteractEvent event){
         if(!event.getAction().equals(PlayerInteractEvent.Action.RIGHT_CLICK_BLOCK)) return;
 
@@ -147,6 +149,49 @@ public class BlockListener implements Listener {
         }
 
         event.setCancelled(checkTap(event, region, chests, "chests") || checkTap(event, region, furnaces, "furnace") || checkTap(event, region, redstone, "redstone"));
+    } */
+    @EventHandler(priority = EventPriority.HIGH)
+    public void onFlintAndSteelUse(PlayerInteractEvent event) {
+        if (!event.getAction().equals(PlayerInteractEvent.Action.RIGHT_CLICK_BLOCK)) return;
+
+        Player player = event.getPlayer();
+        if (player.getInventory().getItemInHand().getId() == Item.FLINT_AND_STEEL) {
+            Point point = new Point(event.getBlock());
+            Region region = point.getCacheRegion(player);
+
+            if (region != null && region.getRole(player.getName()) == Role.Nobody && !customMethods.canDoAllCondition.check(player)) {
+                player.sendTip("§cУ вас нет доступа использовать зажигалку в данном регионе");
+                event.setCancelled(true);
+            }
+        }
+    }
+    @EventHandler(priority = EventPriority.HIGH)
+    public void onChestInventoryOpen(PlayerInteractEvent event) {
+        Player player = event.getPlayer();
+        Point point = new Point(event.getBlock());
+        Region region = point.getCacheRegion(player);
+
+        if (region != null && region.getRole(player.getName()) == Role.Nobody && !customMethods.canDoAllCondition.check(player)) {
+            if (!region.getFlag(main.getFlags().get("chests"))) {
+                player.sendTip("§cУ вас нет доступа к данному региону");
+                event.setCancelled(true);
+            }
+        }
+    }
+    @EventHandler(priority = EventPriority.HIGH)
+    public void onFurnaceInventoryOpen(PlayerInteractEvent event) {
+        if (!event.getAction().equals(PlayerInteractEvent.Action.RIGHT_CLICK_BLOCK)) return;
+
+        Player player = event.getPlayer();
+        Point point = new Point(event.getBlock());
+        Region region = point.getCacheRegion(player);
+
+        if (region != null && region.getRole(player.getName()) == Role.Nobody && !customMethods.canDoAllCondition.check(player)) {
+            if (!region.getFlag(main.getFlags().get("furnace"))) {
+                player.sendTip("§cУ вас нет доступа к данному региону");
+                event.setCancelled(true);
+            }
+        }
     }
 
 }
