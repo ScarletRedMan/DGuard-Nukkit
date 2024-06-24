@@ -2,6 +2,7 @@ package ru.dragonestia.dguard.listeners;
 
 import cn.nukkit.Player;
 import cn.nukkit.block.Block;
+import cn.nukkit.block.BlockFenceGate;
 import cn.nukkit.blockentity.BlockEntity;
 import cn.nukkit.blockentity.BlockEntityChest;
 import cn.nukkit.blockentity.BlockEntityFurnace;
@@ -126,19 +127,23 @@ public class BlockListener implements Listener {
     }
 
     @EventHandler(priority = EventPriority.HIGH)
-    public void onTap(PlayerInteractEvent event){
-        if(!event.getAction().equals(PlayerInteractEvent.Action.RIGHT_CLICK_BLOCK)) return;
+    public void onTap(PlayerInteractEvent event) {
+        if (!event.getAction().equals(PlayerInteractEvent.Action.RIGHT_CLICK_BLOCK)) return;
 
         Player player = event.getPlayer();
-        Point point = new Point(event.getBlock());
-        Region region = point.getCacheRegion(player);
+        Block clickedBlock = event.getBlock();
 
-        if(region == null){
-            return;
-        }
+        // Проверяем, является ли кликнутый блок деревянными воротами (BlockFenceGate)
+        if (clickedBlock instanceof BlockFenceGate) {
+            Point point = new Point(clickedBlock);
+            Region region = point.getCacheRegion(player);
 
-        if(blockedItems.contains(player.getInventory().getItemInHand().getId())){
-            if(region.getRole(player.getName()).getId() < Role.Member.getId() && !customMethods.canDoAllCondition.check(player)){
+            if (region == null) {
+                return;
+            }
+
+            // Проверяем разрешения региона
+            if (region.getRole(player.getName()).getId() < Role.Member.getId() && !customMethods.canDoAllCondition.check(player)) {
                 player.sendTip("§cУ вас нет доступа к данному региону");
                 event.setCancelled(true);
                 return;
@@ -146,13 +151,16 @@ public class BlockListener implements Listener {
         }
 
         if(doors.contains(event.getBlock().getId())){
+            Point point = new Point(clickedBlock);
+            Region region = point.getCacheRegion(player);
             if(region.getRole(player.getName()).equals(Role.Nobody) && !region.getFlag(main.getFlags().get("doors")) && !customMethods.canDoAllCondition.check(player)){
                 player.sendTip("§cУ вас нет доступа к данному региону");
                 event.setCancelled(true);
                 return;
             }
         }
-
+        Point point = new Point(clickedBlock);
+        Region region = point.getCacheRegion(player);
         event.setCancelled(checkTap(event, region, chests, "chests") || checkTap(event, region, furnaces, "furnace") || checkTap(event, region, redstone, "redstone"));
     }
     @EventHandler(priority = EventPriority.HIGH)
