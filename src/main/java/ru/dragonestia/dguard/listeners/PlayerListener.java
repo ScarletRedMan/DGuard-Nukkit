@@ -82,5 +82,18 @@ public class PlayerListener implements Listener {
         main.getSecondPoints().remove(player.getId());
         DGuard.cachedRegion.remove(player.getId());
     }
+    @EventHandler
+    public void onFallDamage(EntityDamageEvent event) {
+        if (event.getCause() == EntityDamageEvent.DamageCause.FALL && event.getEntity() instanceof Player) {
+            Player player = (Player) event.getEntity();
+            Point point = new Point(player);
+            Region region = point.getCacheRegion(player);
+
+            if (region != null && !region.getFlag(main.getFlags().get("fall-damage"))) {
+                event.setCancelled(true);
+                player.sendTip("§aУрон от падения отключен в этом регионе");
+            }
+        }
+    }
 
 }
